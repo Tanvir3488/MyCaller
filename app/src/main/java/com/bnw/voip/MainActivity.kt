@@ -3,19 +3,16 @@ package com.bnw.voip
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.sip.SipManager
 import android.os.Bundle
-import android.os.Looper
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.postDelayed
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.Constants
 import java.net.DatagramSocket
 import java.net.InetAddress
-import java.util.logging.Handler
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,23 +20,22 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        val sipManager = SipManager(this)
-        sipManager.start()
-        findViewById<Button>(R.id.login).setOnClickListener {
-            sipManager.login()
-        }
+        val customeSipManager = CustomeSipManager(this)
+        customeSipManager.start()
+
+            customeSipManager.login()
+
         findViewById<Button>(R.id.call).setOnClickListener {
-            sipManager.call("01945936934")
+           val number = findViewById<TextView>(R.id.number)
+            customeSipManager.call(number.text.toString())
         }
 
+        findViewById<Button>(R.id.endCall).setOnClickListener {
 
+            customeSipManager.hangup()
+        }
 
        testUdpConnection()
-       // sipManager.start()
-       // sipManager.login()
-       // /Thread.sleep(2000)
-        //sipManager.call("01945936934")
-
 
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork

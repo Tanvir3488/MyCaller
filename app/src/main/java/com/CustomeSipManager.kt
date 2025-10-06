@@ -6,11 +6,9 @@ import android.os.Looper
 import android.util.Log
 import com.Constants
 import org.linphone.core.*
-import java.net.DatagramSocket
-import java.net.InetAddress
 
 
-class SipManager(private val context: Context) {
+class CustomeSipManager(private val context: Context) {
     private val core: Core
     private val handler = Handler(Looper.getMainLooper())
     private var isStarted = false
@@ -47,7 +45,7 @@ class SipManager(private val context: Context) {
 
         // Configure network settings for Asterisk compatibility
         core.isIpv6Enabled = false // Disable IPv6 if Asterisk doesn't support it
-        core.setUserAgent("LinphoneAndroid", core.version)
+        core.setUserAgent("T", core.version)
         core.isKeepAliveEnabled = true
         core.guessHostname = true
 
@@ -394,6 +392,7 @@ class SipManager(private val context: Context) {
     /**
      * Check if in a call
      */
+
     fun isInCall(): Boolean {
         return core.callsNb > 0
     }
@@ -415,7 +414,7 @@ class SipManager(private val context: Context) {
     }
 
     protected open fun onIncomingCall(call: Call) {
-        // Override in subclass or use listeners
+        call.accept()
     }
 
     protected open fun onCallConnected(call: Call) {
