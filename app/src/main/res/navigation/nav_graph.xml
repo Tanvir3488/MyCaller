@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/dialerFragment">
+
+    <fragment
+        android:id="@+id/contactsFragment"
+        android:name="com.bnw.voip.ui.main.contacts.ContactsFragment"
+        android:label="fragment_contacts"
+        tools:layout="@layout/fragment_contacts" />
+    <fragment
+        android:id="@+id/dialerFragment"
+        android:name="com.bnw.voip.ui.main.dialer.DialerFragment"
+        android:label="fragment_dialer"
+        tools:layout="@layout/fragment_dialer" />
+    <fragment
+        android:id="@+id/callHistoryFragment"
+        android:name="com.bnw.voip.ui.main.callhistory.CallHistoryFragment"
+        android:label="fragment_call_history"
+        tools:layout="@layout/fragment_call_history" />
+</navigation>

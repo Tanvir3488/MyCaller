@@ -1,10 +1,10 @@
-package com.bnw.voip
+package com.bnw.voip.voip
 
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.Constants
+import com.bnw.voip.voip.Constants
 import org.linphone.core.*
 
 

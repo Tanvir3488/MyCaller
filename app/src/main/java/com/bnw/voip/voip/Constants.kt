@@ -1,4 +1,4 @@
-package com
+package com.bnw.voip.voip
 
 object Constants {
     const val USERNAME = "09647096424"
