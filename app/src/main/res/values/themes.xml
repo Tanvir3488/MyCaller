@@ -6,4 +6,27 @@
     </style>
 
     <style name="Theme.Voip" parent="Base.Theme.Voip" />
+    <style name="DialButton">
+        <item name="android:layout_width">100dp</item>
+        <item name="android:layout_height">100dp</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:background">@drawable/bg_circle_grey</item>
+        <item name="android:backgroundTint">@null</item> <!-- this removes the purple -->
+        <item name="android:textSize">18sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="DialKey">
+        <item name="android:layout_width">90dp</item>
+        <item name="android:layout_height">90dp</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/bg_circle_grey</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+
+
 </resources>

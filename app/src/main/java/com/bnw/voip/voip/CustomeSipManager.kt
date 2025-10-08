@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.bnw.voip.utils.CallNotificationManager
 import com.bnw.voip.voip.Constants
 import org.linphone.core.*
 
@@ -287,7 +288,8 @@ class CustomeSipManager(private val context: Context) {
     /**
      * Make an outgoing call
      */
-    fun call(number: String) {
+    fun call(number1: String) {
+        val number = number1.replace("[^0-9+]", "").replace(" ","").trim()
         Log.d(TAG, "Attempting to call: $number")
 
         if (!isRegistered()) {
@@ -414,7 +416,9 @@ class CustomeSipManager(private val context: Context) {
     }
 
     protected open fun onIncomingCall(call: Call) {
-        call.accept()
+        val callNotificationManager = CallNotificationManager(context)
+        callNotificationManager.showIncomingCall(call.remoteAddress.displayName ?: "Unknown")
+       // call.accept()
     }
 
     protected open fun onCallConnected(call: Call) {
