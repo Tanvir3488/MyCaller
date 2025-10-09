@@ -1,7 +1,10 @@
 package com.bnw.voip.di
 
-import com.bnw.voip.data.repository.CallHistoryRepository
-import com.bnw.voip.data.repository.CallHistoryRepositoryImpl
+
+import com.bnw.voip.data.repository.CallLogRepository
+import com.bnw.voip.data.repository.CallLogRepositoryImpl
+import com.bnw.voip.data.repository.CallRepository
+import com.bnw.voip.data.repository.CallRepositoryImpl
 import com.bnw.voip.data.repository.ContactRepository
 import com.bnw.voip.data.repository.ContactRepositoryImpl
 import dagger.Binds
@@ -16,13 +19,15 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindCallHistoryRepository(
-        callHistoryRepositoryImpl: CallHistoryRepositoryImpl
-    ): CallHistoryRepository
+    abstract fun bindCallRepository(impl: CallRepositoryImpl): CallRepository
 
     @Binds
     @Singleton
     abstract fun bindContactRepository(
         contactRepositoryImpl: ContactRepositoryImpl
     ): ContactRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCallLogRepository(impl: CallLogRepositoryImpl): CallLogRepository
 }

@@ -14,12 +14,16 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.bnw.voip.R
 import com.bnw.voip.ui.incommingcall.IncomingCallActivity
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /******
  **** Created By  TANVIR3488 AT 8/10/25 10:40 PM
  ******/
 
-class CallNotificationManager(private val context: Context) {
+@Singleton
+class CallNotificationManager @Inject constructor(@ApplicationContext private val context: Context) {
 
     private val channelId = "call_channel1"
     private val notificationId = 1003

@@ -9,8 +9,10 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bnw.voip.databinding.FragmentContactsBinding
+import com.bnw.voip.voip.CustomeSipManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ContactsFragment : Fragment() {
@@ -20,6 +22,9 @@ class ContactsFragment : Fragment() {
 
     private val viewModel: ContactViewModel by viewModels()
     private lateinit var contactAdapter: ContactAdapter
+
+    @Inject
+    lateinit var sipManager: CustomeSipManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,7 +48,9 @@ class ContactsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        contactAdapter = ContactAdapter()
+        contactAdapter = ContactAdapter { phoneNumber ->
+            sipManager.call(phoneNumber)
+        }
         binding.contactsRecyclerView.apply {
             adapter = contactAdapter
             layoutManager = LinearLayoutManager(requireContext())

@@ -1,20 +1,22 @@
 package com.bnw.voip.ui.main.dialer
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.bnw.voip.MyApplication.Companion.sipManager
+import androidx.fragment.app.viewModels
 import com.bnw.voip.databinding.FragmentDialerBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class DialerFragment : Fragment(), View.OnClickListener {
 
     private var _binding: FragmentDialerBinding? = null
     private val binding get() = _binding!!
+
+    private val viewModel: DialerViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -22,6 +24,8 @@ class DialerFragment : Fragment(), View.OnClickListener {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentDialerBinding.inflate(inflater, container, false)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
     }
 
@@ -44,18 +48,16 @@ class DialerFragment : Fragment(), View.OnClickListener {
 
         // Delete button
         binding.btnDelete.setOnClickListener {
-            val currentText = binding.phoneNumber.text.toString()
-            if (currentText.isNotEmpty()) {
-                binding.phoneNumber.text = currentText.dropLast(1)
-            }
+            viewModel.onDeletePressed()
         }
 
         // Call button
         binding.btnCall.setOnClickListener {
-            val number = binding.phoneNumber.text.toString()
-            if (number.isNotEmpty()) {
-               sipManager.call(number)
-            }
+            viewModel.onCallPressed()
+        }
+
+        viewModel.phoneNumber.observe(viewLifecycleOwner) {
+            binding.phoneNumber.text = it
         }
     }
 
@@ -63,7 +65,7 @@ class DialerFragment : Fragment(), View.OnClickListener {
         if (v is TextView) {  // now using TextView instead of Button
             // Only append the first line (to avoid adding \nABC etc.)
             val text = v.text.toString().split("\n")[0]
-            binding.phoneNumber.append(text)
+            viewModel.onDigitPressed(text)
         }
     }
 

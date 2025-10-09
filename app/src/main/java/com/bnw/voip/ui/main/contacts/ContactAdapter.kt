@@ -1,21 +1,20 @@
 package com.bnw.voip.ui.main.contacts
 
 import android.app.AlertDialog
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bnw.voip.MyApplication.Companion.sipManager
 import com.bnw.voip.data.entity.Contact
 import com.bnw.voip.databinding.ItemContactBinding
 import java.util.*
 
-class ContactAdapter : ListAdapter<Contact, ContactAdapter.ContactViewHolder>(ContactDiffCallback()) {
+class ContactAdapter(
+    private val onCallClickListener: (String) -> Unit
+) : ListAdapter<Contact, ContactAdapter.ContactViewHolder>(ContactDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
             ContactViewHolder {
@@ -31,7 +30,7 @@ class ContactAdapter : ListAdapter<Contact, ContactAdapter.ContactViewHolder>(Co
         RecyclerView.ViewHolder(binding.root) {
         fun bind(contact: Contact) {
             binding.contactName.text = contact.name
-            binding.contactNumber.text = contact.phoneNumbers[0]
+            binding.contactNumber.text = contact.phoneNumbers.firstOrNull()
             binding.contactInitial.text = contact.name.first().toString()
 
             val randomColor = getRandomColor()
@@ -40,12 +39,12 @@ class ContactAdapter : ListAdapter<Contact, ContactAdapter.ContactViewHolder>(Co
 
             binding.callButton.setOnClickListener {
                 if (contact.phoneNumbers.size == 1) {
-                    sipManager.call( contact.phoneNumbers[0])
+                    onCallClickListener(contact.phoneNumbers[0])
                 } else {
                     val builder = AlertDialog.Builder(binding.root.context)
                     builder.setTitle("Choose a number")
                     builder.setItems(contact.phoneNumbers.toTypedArray()) { _, which ->
-                        sipManager.call( contact.phoneNumbers[which])
+                        onCallClickListener(contact.phoneNumbers[which])
                     }
                     builder.show()
                 }

@@ -3,19 +3,19 @@ package com.bnw.voip.ui.incommingcall
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.SystemClock
+import android.util.Log
 import android.view.View
-import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.bnw.voip.MyApplication.Companion.sipManager
-import com.bnw.voip.R
 import com.bnw.voip.databinding.ActivityIncomingCallBinding
-import com.bnw.voip.voip.CustomeSipManager
+import dagger.hilt.android.AndroidEntryPoint
+import org.linphone.core.Call
 
+@AndroidEntryPoint
 class IncomingCallActivity : AppCompatActivity() {
     private lateinit var binding: ActivityIncomingCallBinding
     private var countDownTimer: CountDownTimer? = null
+    private val viewModel: IncomingCallViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,14 +27,28 @@ class IncomingCallActivity : AppCompatActivity() {
         binding.tvCaller.text = "Incoming call: $caller"
 
         binding.btnAccept.setOnClickListener {
-            sipManager.answerCall()
-            binding.tvTimer.base = SystemClock.elapsedRealtime()
-            binding.tvTimer.visibility = View.VISIBLE
-            binding.tvTimer.start()   // start counting up
+            viewModel.answerCall()
         }
 
         binding.btnDecline.setOnClickListener {
-            finish() // end call UI
+            viewModel.hangupCall()
+        }
+
+        viewModel.callState.observe(this) { state ->
+            Log.e("Call State:","Call $state")
+            when (state?.state) {
+                Call.State.Connected, Call.State.StreamsRunning -> {
+                    binding.tvTimer.base = SystemClock.elapsedRealtime()
+                    binding.tvTimer.visibility = View.VISIBLE
+                    binding.tvTimer.start()
+                }
+                Call.State.Released -> {
+                    finish()
+                }
+                else -> {
+                    // Handle other states if needed
+                }
+            }
         }
     }
 

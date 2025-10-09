@@ -2,7 +2,7 @@ package com.bnw.voip.di
 
 import android.content.Context
 import androidx.room.Room
-import com.bnw.voip.data.db.CallDetailsDao
+import com.bnw.voip.data.db.CallLogsDao
 import com.bnw.voip.data.db.ContactDao
 import com.bnw.voip.data.db.VoipDatabase
 import dagger.Module
@@ -27,8 +27,8 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideCallDetailsDao(voipDatabase: VoipDatabase): CallDetailsDao {
-        return voipDatabase.callDetailsDao()
+    fun provideCallLogsDao(database: VoipDatabase): CallLogsDao {
+        return database.callLogsDao()
     }
 
     @Provides

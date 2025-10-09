@@ -46,6 +46,11 @@
             android:exported="false"
             android:theme="@style/Theme.Voip" />
 
+        <activity
+            android:name=".ui.outgoingcall.OutgoingCallActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Voip" />
+
         <service
             android:name=".utils.CallService"
             android:enabled="true"

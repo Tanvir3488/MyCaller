@@ -1,36 +1,18 @@
-package com.bnw.voip.voip
+package com.bnw.voip.utils
 
 import android.content.Context
-import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.bnw.voip.domain.usecase.AddCallLogUseCase
-import com.bnw.voip.ui.outgoingcall.OutgoingCallActivity
+import com.bnw.voip.utils.CallNotificationManager
 import com.bnw.voip.voip.Constants
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import org.linphone.core.*
-import javax.inject.Inject
-import javax.inject.Singleton
 
 
-@Singleton
-class CustomeSipManager @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val core: Core,
-    private val addCallLogUseCase: AddCallLogUseCase
-) {
+class Tanaaaa(private val context: Context) {
+    private val core: Core
     private val handler = Handler(Looper.getMainLooper())
     private var isStarted = false
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
-
-    private val _callState = MutableStateFlow<CallStateEvent?>(null)
-    val callState: StateFlow<CallStateEvent?> = _callState
 
     private val iterateRunnable = object : Runnable {
         override fun run() {
@@ -43,6 +25,31 @@ class CustomeSipManager @Inject constructor(
 
     init {
         Log.d(TAG, "Initializing SipManager")
+
+        val factory = Factory.instance()
+        factory.setDebugMode(true, "Linphone")
+
+        core = factory.createCore(null, null, context)
+
+        // Configure transports - Disable TLS completely
+        core.transports?.apply {
+            udpPort = 0      // Random port for UDP
+            tcpPort = 0      // Random port for TCP
+            tlsPort = -1     // DISABLE TLS completely
+        }
+
+        Log.d(TAG, "Transports configured - UDP: enabled, TCP: enabled, TLS: DISABLED")
+
+        // Configure audio settings
+        core.isEchoCancellationEnabled = true
+        core.isAdaptiveRateControlEnabled = true
+
+        // Configure network settings for Asterisk compatibility
+        core.isIpv6Enabled = false // Disable IPv6 if Asterisk doesn't support it
+        core.setUserAgent("T", core.version)
+        core.isKeepAliveEnabled = true
+        core.guessHostname = true
+
         // Add core listener
         core.addListener(object : CoreListenerStub() {
             override fun onAccountRegistrationStateChanged(
@@ -79,7 +86,6 @@ class CustomeSipManager @Inject constructor(
                 state: Call.State,
                 message: String
             ) {
-                _callState.value = CallStateEvent(state, call)
                 Log.d(TAG, "Call state changed: $state, message: $message")
                 when (state) {
                     Call.State.IncomingReceived -> {
@@ -283,22 +289,13 @@ class CustomeSipManager @Inject constructor(
      * Make an outgoing call
      */
     fun call(number1: String) {
-        val number = number1.replace("[^0-9+]".toRegex(), "").replace(" ", "").trim()
+        val number = number1.replace("[^0-9+]", "").replace(" ","").trim()
         Log.d(TAG, "Attempting to call: $number")
 
         if (!isRegistered()) {
             Log.e(TAG, "Cannot make call: Not registered")
             return
         }
-
-
-
-        val intent = Intent(context, OutgoingCallActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            putExtra("caller_name", "Unknown")
-            putExtra("phone_number", number)
-        }
-        context.startActivity(intent)
 
         val remoteAddress = Factory.instance().createAddress("sip:$number@${Constants.DOMAIN}")
         if (remoteAddress != null) {
@@ -419,8 +416,8 @@ class CustomeSipManager @Inject constructor(
     }
 
     protected open fun onIncomingCall(call: Call) {
-       // val callNotificationManager = CallNotificationManager(context)
-       // callNotificationManager.showIncomingCall(call.remoteAddress.displayName ?: "Unknown")
+        val callNotificationManager = CallNotificationManager(context)
+        callNotificationManager.showIncomingCall(call.remoteAddress.displayName ?: "Unknown")
        // call.accept()
     }
 

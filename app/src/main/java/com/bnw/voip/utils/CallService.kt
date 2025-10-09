@@ -8,10 +8,21 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.bnw.voip.MyApplication.Companion.sipManager
 import com.bnw.voip.R
+import com.bnw.voip.domain.usecase.call.GetCallStateUseCase
+import com.bnw.voip.domain.usecase.call.LoginUseCase
+import com.bnw.voip.domain.usecase.call.StartSipUseCase
 import com.bnw.voip.ui.main.MainActivity
-import com.bnw.voip.voip.CustomeSipManager
+import com.bnw.voip.voip.CallTracker
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import org.linphone.core.Call
+import javax.inject.Inject
 
 /******
 
@@ -19,8 +30,22 @@ import com.bnw.voip.voip.CustomeSipManager
 
  ******/
 
-
+@AndroidEntryPoint
 class CallService : Service() {
+
+    @Inject
+    lateinit var loginUseCase: LoginUseCase
+
+    @Inject
+    lateinit var callTracker: CallTracker
+    @Inject
+    lateinit var startSipUseCase: StartSipUseCase
+    @Inject
+    lateinit var getCallStateUseCase: GetCallStateUseCase
+    @Inject
+    lateinit var callNotificationManager: CallNotificationManager
+
+    private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     override fun onBind(intent: Intent?): IBinder? {
         // Not using binding here
@@ -30,6 +55,18 @@ class CallService : Service() {
     override fun onCreate() {
         super.onCreate()
         startForegroundService()
+        loginUseCase()
+        startSipUseCase()
+        callTracker.startTracking()
+        serviceScope.launch {
+            getCallStateUseCase().collect {
+                if (it?.state == Call.State.IncomingReceived) {
+                    callNotificationManager.showIncomingCall(it.call?.remoteAddress?.displayName ?: "Unknown")
+                }else if (it?.state == Call.State.End || it?.state == Call.State.Released) {
+                    callNotificationManager.dismissNotification()
+                }
+            }
+        }
     }
 
     private fun startForegroundService() {
@@ -66,16 +103,10 @@ class CallService : Service() {
 
         // Start service in the foreground
         startForeground(1, notification)
-
-
-
-        sipManager.login()
-        sipManager.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // Cleanup if needed
+        serviceScope.cancel()
     }
 }
-

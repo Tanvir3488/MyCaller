@@ -1,13 +1,13 @@
 package com.bnw.voip.domain.usecase
 
-import com.bnw.voip.data.entity.CallDetails
-import com.bnw.voip.data.repository.CallHistoryRepository
+import com.bnw.voip.data.entity.CallLogs
+import com.bnw.voip.data.repository.CallLogRepository
 import javax.inject.Inject
 
 class AddCallLogUseCase @Inject constructor(
-    private val callHistoryRepository: CallHistoryRepository
+    private val callLogRepository: CallLogRepository
 ) {
-    suspend operator fun invoke(callDetails: CallDetails) {
-        callHistoryRepository.insertCallDetails(callDetails)
+    suspend operator fun invoke(callLogs: CallLogs) {
+        callLogRepository.insertCallLog(callLogs)
     }
 }
