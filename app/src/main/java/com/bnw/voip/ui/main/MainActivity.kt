@@ -28,9 +28,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        //val customeSipManager = CustomeSipManager(this)
-//        customeSipManager.start()
-//        customeSipManager.login()
         val serviceIntent = Intent(this, CallService::class.java)
         ContextCompat.startForegroundService(this, serviceIntent)
 

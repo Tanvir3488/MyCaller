@@ -13,7 +13,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.bnw.voip.R
-import com.bnw.voip.ui.incommingcall.IncomingCallActivity
+import com.bnw.voip.ui.incommingcall.CallingActivity
+import com.bnw.voip.utils.AppConstants.CALL_TYPE_INCOMING
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,17 +26,14 @@ import javax.inject.Singleton
 @Singleton
 class CallNotificationManager @Inject constructor(@ApplicationContext private val context: Context) {
 
-    private val channelId = "call_channel1"
-    private val notificationId = 1003
-
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                channelId,
-                "Call Notifications1",
+                AppConstants.CALL_CHANNEL_ID,
+                AppConstants.CALL_CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Incoming call alerts1"
+                description = AppConstants.CALL_CHANNEL_DESCRIPTION
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                 // Enable sound and vibration for better alerting
                 enableVibration(true)
@@ -59,12 +57,12 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
         }
 
         // Full-screen intent for locked/sleeping phone
-        val fullScreenIntent = Intent(context, IncomingCallActivity::class.java).apply {
+        val fullScreenIntent = Intent(context, CallingActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or
                 Intent.FLAG_ACTIVITY_CLEAR_TOP or
                 Intent.FLAG_ACTIVITY_SINGLE_TOP
-            putExtra("caller_name", callerName)
-            putExtra("call_id", callId)
+            putExtra(AppConstants.CALLER_NAME, callerName)
+            putExtra(AppConstants.CALL_ID, callId)
         }
 
         val fullScreenPendingIntent = PendingIntent.getActivity(
@@ -83,11 +81,12 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
         )
 
         // Answer action
-        val answerIntent = Intent(context, IncomingCallActivity::class.java).apply {
-            action = "ACTION_ANSWER_CALL"
+        val answerIntent = Intent(context, CallingActivity::class.java).apply {
+            action = AppConstants.ACTION_ANSWER_CALL
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            putExtra("caller_name", callerName)
-            putExtra("call_id", callId)
+            putExtra(AppConstants.CALLER_NAME, callerName)
+            putExtra(AppConstants.CALL_ID, callId)
+            putExtra(AppConstants.CALL_TYPE, CALL_TYPE_INCOMING)
         }
         val answerPendingIntent = PendingIntent.getActivity(
             context,
@@ -97,10 +96,10 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
         )
 
         // Decline action
-        val declineIntent = Intent(context, IncomingCallActivity::class.java).apply {
-            action = "ACTION_DECLINE_CALL"
+        val declineIntent = Intent(context, CallingActivity::class.java).apply {
+            action = AppConstants.ACTION_DECLINE_CALL
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            putExtra("call_id", callId)
+            putExtra(AppConstants.CALL_ID, callId)
         }
         val declinePendingIntent = PendingIntent.getActivity(
             context,
@@ -109,14 +108,14 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(context, channelId)
-            .setContentTitle("Incoming Call")
+        val notification = NotificationCompat.Builder(context, AppConstants.CALL_CHANNEL_ID)
+            .setContentTitle(AppConstants.INCOMING_CALL_TITLE)
             .setContentText("Call from $callerName")
             .setSmallIcon(R.drawable.ic_call)
             .setCategory(NotificationCompat.CATEGORY_CALL)
             .setPriority(NotificationCompat.PRIORITY_MAX) // MAX for full-screen
             .setOngoing(true)
-            .setAutoCancel(false)
+            .setAutoCancel(true)
             .setContentIntent(contentIntent)
             .setFullScreenIntent(fullScreenPendingIntent, true) // Critical for lock screen
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC) // Show on lock screen
@@ -135,11 +134,11 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
             .build()
 
         val manager = NotificationManagerCompat.from(context)
-        manager.notify(notificationId, notification)
+        manager.notify(AppConstants.CALL_NOTIFICATION_ID, notification)
     }
 
     fun dismissNotification() {
         val manager = NotificationManagerCompat.from(context)
-        manager.cancel(notificationId)
+        manager.cancel(AppConstants.CALL_NOTIFICATION_ID)
     }
 }

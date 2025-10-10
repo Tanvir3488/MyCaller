@@ -7,19 +7,31 @@
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
-    <!-- Caller Name/Number -->
+    <!-- Caller Name -->
     <TextView
-        android:id="@+id/tvCaller"
+        android:id="@+id/tvCallerName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Incoming call: +880123456789"
-        android:textSize="22sp"
+        android:text="Unknown"
+        android:textSize="28sp"
         android:textColor="@android:color/white"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="48dp"/>
+
+    <!-- Caller Number -->
+    <TextView
+        android:id="@+id/tvCallerNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/tvCallerName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"/>
 
     <!-- Countdown Timer (hidden until Accept clicked) -->
     <Chronometer
@@ -30,7 +42,7 @@
         android:textStyle="bold"
         android:textColor="@android:color/holo_green_light"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/tvCaller"
+        app:layout_constraintTop_toBottomOf="@id/tvCallerNumber"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="20dp"/>

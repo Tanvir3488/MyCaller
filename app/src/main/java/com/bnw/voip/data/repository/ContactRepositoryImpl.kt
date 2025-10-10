@@ -18,6 +18,14 @@ class ContactRepositoryImpl @Inject constructor(
         return contactDao.getAll()
     }
 
+    override fun searchContacts(query: String): Flow<List<Contact>> {
+        return contactDao.searchContacts(query)
+    }
+
+    override suspend fun getContactByNumber(number: String): Contact? {
+        return contactDao.getContactByNumber(number)
+    }
+
     @SuppressLint("Range")
     override suspend fun syncContacts() {
         val deviceContacts = mutableMapOf<String, MutableList<String>>()
@@ -34,7 +42,7 @@ class ContactRepositoryImpl @Inject constructor(
             while (it.moveToNext()) {
                 val name = it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
                 val phoneNumber = it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                val normalizedPhoneNumber = phoneNumber.replace("[^0-9+]", "")
+                val normalizedPhoneNumber = phoneNumber.replace("[^0-9+]".toRegex(), "").replace(" ", "").trim()
                 deviceContacts.getOrPut(name) { mutableListOf() }.add(normalizedPhoneNumber)
             }
         }

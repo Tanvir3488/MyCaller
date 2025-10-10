@@ -8,5 +8,11 @@ import javax.inject.Inject
 class GetContactsUseCase @Inject constructor(
     private val contactRepository: ContactRepository
 ) {
-    operator fun invoke(): Flow<List<Contact>> = contactRepository.getContacts()
+    operator fun invoke(query: String): Flow<List<Contact>> {
+        return if (query.isBlank()) {
+            contactRepository.getContacts()
+        } else {
+            contactRepository.searchContacts(query)
+        }
+    }
 }

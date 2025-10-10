@@ -1,20 +1,21 @@
 package com.bnw.voip.ui.incommingcall
 
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.bnw.voip.databinding.ActivityIncomingCallBinding
+import com.bnw.voip.utils.AppConstants
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import org.linphone.core.Call
 
 @AndroidEntryPoint
-class IncomingCallActivity : AppCompatActivity() {
+class CallingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityIncomingCallBinding
-    private var countDownTimer: CountDownTimer? = null
     private val viewModel: IncomingCallViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,9 +23,14 @@ class IncomingCallActivity : AppCompatActivity() {
         binding = ActivityIncomingCallBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Show caller number dynamically if passed via intent
-        val caller = intent.getStringExtra("caller") ?: "+880123456789"
-        binding.tvCaller.text = "Incoming call: $caller"
+        when (intent?.action) {
+            AppConstants.ACTION_ANSWER_CALL -> {
+                viewModel.answerCall()
+            }
+            AppConstants.ACTION_DECLINE_CALL -> {
+                viewModel.hangupCall()
+            }
+        }
 
         binding.btnAccept.setOnClickListener {
             viewModel.answerCall()
@@ -34,13 +40,35 @@ class IncomingCallActivity : AppCompatActivity() {
             viewModel.hangupCall()
         }
 
+        lifecycleScope.launch {
+            viewModel.callerName.collect { name ->
+                binding.tvCallerName.text = name
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.callerNumber.collect { number ->
+                binding.tvCallerNumber.text = number
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.uiState.collect { uiState ->
+                binding.btnAccept.visibility = if (uiState.isAcceptButtonVisible) View.VISIBLE else View.GONE
+                binding.btnDecline.text = uiState.declineButtonText
+            }
+        }
+
         viewModel.callState.observe(this) { state ->
-            Log.e("Call State:","Call $state")
+            Log.e("CallingActivity:", "Call $state")
             when (state?.state) {
                 Call.State.Connected, Call.State.StreamsRunning -> {
                     binding.tvTimer.base = SystemClock.elapsedRealtime()
                     binding.tvTimer.visibility = View.VISIBLE
                     binding.tvTimer.start()
+                }
+                Call.State.End -> {
+                    finish()
                 }
                 Call.State.Released -> {
                     finish()
@@ -52,23 +80,7 @@ class IncomingCallActivity : AppCompatActivity() {
         }
     }
 
-    private fun startCountdown() {
-        countDownTimer = object : CountDownTimer(60_000, 1000) { // 1 minute
-            override fun onTick(millisUntilFinished: Long) {
-                val seconds = millisUntilFinished / 1000
-                val minutes = seconds / 60
-                val sec = seconds % 60
-                binding.tvTimer.text = String.format("%02d:%02d", minutes, sec)
-            }
-
-            override fun onFinish() {
-                binding.tvTimer.text = "00:00"
-            }
-        }.start()
-    }
-
     override fun onDestroy() {
-        countDownTimer?.cancel()
         super.onDestroy()
     }
 }

@@ -133,7 +133,7 @@
             android:background="@drawable/bg_circle_green"
             android:src="@drawable/ic_call"
             android:scaleType="centerInside"
-            android:tint="@android:color/white" />
+            app:tint="@android:color/white" />
     </LinearLayout>
 
 </LinearLayout>

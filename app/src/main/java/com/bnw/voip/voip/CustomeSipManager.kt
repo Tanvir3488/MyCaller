@@ -6,15 +6,24 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.bnw.voip.domain.usecase.AddCallLogUseCase
-import com.bnw.voip.ui.outgoingcall.OutgoingCallActivity
-import com.bnw.voip.voip.Constants
+import com.bnw.voip.ui.incommingcall.CallingActivity
+import com.bnw.voip.utils.AppConstants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import org.linphone.core.*
+import org.linphone.core.Account
+import org.linphone.core.AudioDevice
+import org.linphone.core.AVPFMode
+import org.linphone.core.Call
+import org.linphone.core.CallStats
+import org.linphone.core.Core
+import org.linphone.core.CoreListenerStub
+import org.linphone.core.Factory
+import org.linphone.core.GlobalState
+import org.linphone.core.RegistrationState
+import org.linphone.core.TransportType
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,7 +51,7 @@ class CustomeSipManager @Inject constructor(
     }
 
     init {
-        Log.d(TAG, "Initializing SipManager")
+        Log.d(AppConstants.TAG_SIP_MANAGER, "Initializing SipManager")
         // Add core listener
         core.addListener(object : CoreListenerStub() {
             override fun onAccountRegistrationStateChanged(
@@ -51,24 +60,24 @@ class CustomeSipManager @Inject constructor(
                 state: RegistrationState,
                 message: String
             ) {
-                Log.d(TAG, "Registration state: $state, message: $message")
+                Log.d(AppConstants.TAG_SIP_MANAGER, "Registration state: $state, message: $message")
                 when (state) {
                     RegistrationState.Ok -> {
-                        Log.i(TAG, "Registration successful")
+                        Log.i(AppConstants.TAG_SIP_MANAGER, "Registration successful")
                         onRegistrationSuccess()
                     }
                     RegistrationState.Failed -> {
-                        Log.e(TAG, "Registration failed: $message")
+                        Log.e(AppConstants.TAG_SIP_MANAGER, "Registration failed: $message")
                         onRegistrationFailed(message)
                     }
                     RegistrationState.Progress -> {
-                        Log.d(TAG, "Registration in progress")
+                        Log.d(AppConstants.TAG_SIP_MANAGER, "Registration in progress")
                     }
                     RegistrationState.Cleared -> {
-                        Log.d(TAG, "Registration cleared")
+                        Log.d(AppConstants.TAG_SIP_MANAGER, "Registration cleared")
                     }
                     else -> {
-                        Log.d(TAG, "Registration state: $state")
+                        Log.d(AppConstants.TAG_SIP_MANAGER, "Registration state: $state")
                     }
                 }
             }
@@ -80,39 +89,39 @@ class CustomeSipManager @Inject constructor(
                 message: String
             ) {
                 _callState.value = CallStateEvent(state, call)
-                Log.d(TAG, "Call state changed: $state, message: $message")
+                Log.d(AppConstants.TAG_SIP_MANAGER, "Call state changed: $state, message: $message")
                 when (state) {
                     Call.State.IncomingReceived -> {
-                        Log.i(TAG, "Incoming call received")
+                        Log.i(AppConstants.TAG_SIP_MANAGER, "Incoming call received")
                         onIncomingCall(call)
                     }
                     Call.State.OutgoingInit -> {
-                        Log.i(TAG, "Outgoing call initiated")
+                        Log.i(AppConstants.TAG_SIP_MANAGER, "Outgoing call initiated")
                     }
                     Call.State.OutgoingProgress -> {
-                        Log.i(TAG, "Outgoing call in progress")
+                        Log.i(AppConstants.TAG_SIP_MANAGER, "Outgoing call in progress")
                     }
                     Call.State.OutgoingRinging -> {
-                        Log.i(TAG, "Remote ringing")
+                        Log.i(AppConstants.TAG_SIP_MANAGER, "Remote ringing")
                     }
                     Call.State.Connected -> {
-                        Log.i(TAG, "Call connected")
+                        Log.i(AppConstants.TAG_SIP_MANAGER, "Call connected")
                         onCallConnected(call)
                     }
                     Call.State.StreamsRunning -> {
-                        Log.i(TAG, "Call streams running (audio/video active)")
+                        Log.i(AppConstants.TAG_SIP_MANAGER, "Call streams running (audio/video active)")
                         onCallActive(call)
                     }
                     Call.State.Released -> {
-                        Log.i(TAG, "Call released")
+                        Log.i(AppConstants.TAG_SIP_MANAGER, "Call released")
                         onCallEnded(call)
                     }
                     Call.State.Error -> {
-                        Log.e(TAG, "Call error: $message")
+                        Log.e(AppConstants.TAG_SIP_MANAGER, "Call error: $message")
                         onCallError(call, message)
                     }
                     else -> {
-                        Log.d(TAG, "Call state: $state")
+                        Log.d(AppConstants.TAG_SIP_MANAGER, "Call state: $state")
                     }
                 }
             }
@@ -122,27 +131,27 @@ class CustomeSipManager @Inject constructor(
                 state: GlobalState,
                 message: String
             ) {
-                Log.d(TAG, "Global state changed: $state, message: $message")
+                Log.d(AppConstants.TAG_SIP_MANAGER, "Global state changed: $state, message: $message")
             }
 
             override fun onNetworkReachable(core: Core, reachable: Boolean) {
-                Log.d(TAG, "Network reachable: $reachable")
+                Log.d(AppConstants.TAG_SIP_MANAGER, "Network reachable: $reachable")
                 if (!reachable) {
-                    Log.w(TAG, "Network is not reachable!")
+                    Log.w(AppConstants.TAG_SIP_MANAGER, "Network is not reachable!")
                 }
             }
 
             override fun onAudioDeviceChanged(core: Core, audioDevice: AudioDevice) {
-                Log.d(TAG, "Audio device changed: ${audioDevice.deviceName}")
+                Log.d(AppConstants.TAG_SIP_MANAGER, "Audio device changed: ${audioDevice.deviceName}")
             }
 
             override fun onCallStatsUpdated(core: Core, call: Call, stats: CallStats) {
                 // Uncomment for detailed call statistics
-                // Log.v(TAG, "Call stats updated")
+                // Log.v(AppConstants.TAG_SIP_MANAGER, "Call stats updated")
             }
         })
 
-        Log.d(TAG, "SipManager initialized successfully")
+        Log.d(AppConstants.TAG_SIP_MANAGER, "SipManager initialized successfully")
     }
 
     /**
@@ -150,15 +159,15 @@ class CustomeSipManager @Inject constructor(
      */
     fun start() {
         if (isStarted) {
-            Log.w(TAG, "SipManager already started")
+            Log.w(AppConstants.TAG_SIP_MANAGER, "SipManager already started")
             return
         }
 
-        Log.d(TAG, "Starting SipManager")
+        Log.d(AppConstants.TAG_SIP_MANAGER, "Starting SipManager")
         core.start()
         isStarted = true
         handler.post(iterateRunnable)
-        Log.i(TAG, "SipManager started successfully")
+        Log.i(AppConstants.TAG_SIP_MANAGER, "SipManager started successfully")
     }
 
     /**
@@ -166,11 +175,11 @@ class CustomeSipManager @Inject constructor(
      */
     fun stop() {
         if (!isStarted) {
-            Log.w(TAG, "SipManager already stopped")
+            Log.w(AppConstants.TAG_SIP_MANAGER, "SipManager already stopped")
             return
         }
 
-        Log.d(TAG, "Stopping SipManager")
+        Log.d(AppConstants.TAG_SIP_MANAGER, "Stopping SipManager")
         isStarted = false
         handler.removeCallbacks(iterateRunnable)
 
@@ -180,7 +189,7 @@ class CustomeSipManager @Inject constructor(
         }
 
         core.stop()
-        Log.i(TAG, "SipManager stopped successfully")
+        Log.i(AppConstants.TAG_SIP_MANAGER, "SipManager stopped successfully")
     }
 
     /**
@@ -188,7 +197,7 @@ class CustomeSipManager @Inject constructor(
      */
     fun login() {
         try {
-            Log.d(TAG, "Attempting login - Username: ${Constants.USERNAME}, Domain: ${Constants.DOMAIN}")
+            Log.d(AppConstants.TAG_SIP_MANAGER, "Attempting login - Username: ${Constants.USERNAME}, Domain: ${Constants.DOMAIN}")
 
             // Create authentication info
             val authInfo = Factory.instance().createAuthInfo(
@@ -200,7 +209,7 @@ class CustomeSipManager @Inject constructor(
                 Constants.DOMAIN       // domain
             )
             core.addAuthInfo(authInfo)
-            Log.d(TAG, "AuthInfo added to core")
+            Log.d(AppConstants.TAG_SIP_MANAGER, "AuthInfo added to core")
 
             // Create account parameters
             val accountParams = core.createAccountParams()
@@ -208,20 +217,20 @@ class CustomeSipManager @Inject constructor(
             // Set identity address
             val identity = Factory.instance().createAddress("sip:${Constants.USERNAME}@${Constants.DOMAIN}")
             if (identity == null) {
-                Log.e(TAG, "Failed to create identity address")
+                Log.e(AppConstants.TAG_SIP_MANAGER, "Failed to create identity address")
                 return
             }
             accountParams.identityAddress = identity
-            Log.d(TAG, "Identity set to: ${identity.asStringUriOnly()}")
+            Log.d(AppConstants.TAG_SIP_MANAGER, "Identity set to: ${identity.asStringUriOnly()}")
 
             // Set server address - FORCE UDP transport for Asterisk
             val serverAddress = Factory.instance().createAddress("sip:${Constants.DOMAIN}:5060;transport=udp")
             if (serverAddress == null) {
-                Log.e(TAG, "Failed to create server address")
+                Log.e(AppConstants.TAG_SIP_MANAGER, "Failed to create server address")
                 return
             }
             accountParams.serverAddress = serverAddress
-            Log.d(TAG, "Server address set to: ${serverAddress.asStringUriOnly()} with transport UDP")
+            Log.d(AppConstants.TAG_SIP_MANAGER, "Server address set to: ${serverAddress.asStringUriOnly()} with transport UDP")
 
             // Enable registration
             accountParams.isRegisterEnabled = true
@@ -244,22 +253,22 @@ class CustomeSipManager @Inject constructor(
             natPolicy.isIceEnabled = false
             accountParams.natPolicy = natPolicy
 
-            Log.d(TAG, "Account parameters configured")
+            Log.d(AppConstants.TAG_SIP_MANAGER, "Account parameters configured")
 
             // Create and add account
             val account = core.createAccount(accountParams)
             if (account == null) {
-                Log.e(TAG, "Failed to create account")
+                Log.e(AppConstants.TAG_SIP_MANAGER, "Failed to create account")
                 return
             }
 
             core.addAccount(account)
             core.defaultAccount = account
 
-            Log.i(TAG, "Account created, registration will start automatically")
+            Log.i(AppConstants.TAG_SIP_MANAGER, "Account created, registration will start automatically")
 
         } catch (e: Exception) {
-            Log.e(TAG, "Exception during login: ${e.message}", e)
+            Log.e(AppConstants.TAG_SIP_MANAGER, "Exception during login: ${e.message}", e)
             e.printStackTrace()
         }
     }
@@ -268,7 +277,7 @@ class CustomeSipManager @Inject constructor(
      * Logout/Unregister from SIP server
      */
     fun logout() {
-        Log.d(TAG, "Logging out")
+        Log.d(AppConstants.TAG_SIP_MANAGER, "Logging out")
         core.defaultAccount?.let { account ->
             val params = account.params.clone()
             params.isRegisterEnabled = false
@@ -276,7 +285,7 @@ class CustomeSipManager @Inject constructor(
         }
         core.clearAccounts()
         core.clearAllAuthInfo()
-        Log.i(TAG, "Logged out successfully")
+        Log.i(AppConstants.TAG_SIP_MANAGER, "Logged out successfully")
     }
 
     /**
@@ -284,19 +293,17 @@ class CustomeSipManager @Inject constructor(
      */
     fun call(number1: String) {
         val number = number1.replace("[^0-9+]".toRegex(), "").replace(" ", "").trim()
-        Log.d(TAG, "Attempting to call: $number")
+        Log.d(AppConstants.TAG_SIP_MANAGER, "Attempting to call: $number")
 
         if (!isRegistered()) {
-            Log.e(TAG, "Cannot make call: Not registered")
+            Log.e(AppConstants.TAG_SIP_MANAGER, "Cannot make call: Not registered")
             return
         }
 
-
-
-        val intent = Intent(context, OutgoingCallActivity::class.java).apply {
+        val intent = Intent(context, CallingActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            putExtra("caller_name", "Unknown")
-            putExtra("phone_number", number)
+            putExtra(AppConstants.CALLER_NAME, number)
+            putExtra(AppConstants.CALL_TYPE, AppConstants.CALL_TYPE_OUTGOING)
         }
         context.startActivity(intent)
 
@@ -306,13 +313,13 @@ class CustomeSipManager @Inject constructor(
             params?.let {
                 val call = core.inviteAddressWithParams(remoteAddress, it)
                 if (call != null) {
-                    Log.i(TAG, "Call initiated to $number")
+                    Log.i(AppConstants.TAG_SIP_MANAGER, "Call initiated to $number")
                 } else {
-                    Log.e(TAG, "Failed to initiate call")
+                    Log.e(AppConstants.TAG_SIP_MANAGER, "Failed to initiate call")
                 }
             }
         } else {
-            Log.e(TAG, "Failed to create remote address for $number")
+            Log.e(AppConstants.TAG_SIP_MANAGER, "Failed to create remote address for $number")
         }
     }
 
@@ -320,29 +327,29 @@ class CustomeSipManager @Inject constructor(
      * Answer an incoming call
      */
     fun answerCall() {
-        Log.d(TAG, "Answering call")
+        Log.d(AppConstants.TAG_SIP_MANAGER, "Answering call")
         core.currentCall?.let { call ->
             call.accept()
-            Log.i(TAG, "Call answered")
-        } ?: Log.w(TAG, "No current call to answer")
+            Log.i(AppConstants.TAG_SIP_MANAGER, "Call answered")
+        } ?: Log.w(AppConstants.TAG_SIP_MANAGER, "No current call to answer")
     }
 
     /**
      * Hangup the current call
      */
     fun hangup() {
-        Log.d(TAG, "Hanging up call")
+        Log.d(AppConstants.TAG_SIP_MANAGER, "Hanging up call")
         core.currentCall?.let { call ->
             call.terminate()
-            Log.i(TAG, "Call terminated")
-        } ?: Log.w(TAG, "No current call to hang up")
+            Log.i(AppConstants.TAG_SIP_MANAGER, "Call terminated")
+        } ?: Log.w(AppConstants.TAG_SIP_MANAGER, "No current call to hang up")
     }
 
     /**
      * Hangup all calls
      */
     fun hangupAll() {
-        Log.d(TAG, "Hanging up all calls")
+        Log.d(AppConstants.TAG_SIP_MANAGER, "Hanging up all calls")
         core.terminateAllCalls()
     }
 
@@ -352,7 +359,7 @@ class CustomeSipManager @Inject constructor(
     fun toggleMicrophoneMute() {
         val isMuted = !core.isMicEnabled
         core.isMicEnabled = !isMuted
-        Log.d(TAG, "Microphone ${if (isMuted) "muted" else "unmuted"}")
+        Log.d(AppConstants.TAG_SIP_MANAGER, "Microphone ${if (isMuted) "muted" else "unmuted"}")
     }
 
     /**
@@ -376,7 +383,7 @@ class CustomeSipManager @Inject constructor(
         }
 
         core.currentCall?.outputAudioDevice = newDevice
-        Log.d(TAG, "Audio device changed to: ${newDevice?.deviceName}")
+        Log.d(AppConstants.TAG_SIP_MANAGER, "Audio device changed to: ${newDevice?.deviceName}")
     }
 
     /**
@@ -384,7 +391,7 @@ class CustomeSipManager @Inject constructor(
      */
     fun sendDtmf(digit: Char) {
         core.currentCall?.sendDtmf(digit)
-        Log.d(TAG, "DTMF sent: $digit")
+        Log.d(AppConstants.TAG_SIP_MANAGER, "DTMF sent: $digit")
     }
 
     /**
@@ -419,9 +426,12 @@ class CustomeSipManager @Inject constructor(
     }
 
     protected open fun onIncomingCall(call: Call) {
-       // val callNotificationManager = CallNotificationManager(context)
-       // callNotificationManager.showIncomingCall(call.remoteAddress.displayName ?: "Unknown")
-       // call.accept()
+//        val intent = Intent(context, CallingActivity::class.java).apply {
+//            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//            putExtra(AppConstants.CALLER_NAME, call.remoteAddress.username)
+//            putExtra(AppConstants.CALL_TYPE, AppConstants.CALL_TYPE_INCOMING)
+//        }
+//        context.startActivity(intent)
     }
 
     protected open fun onCallConnected(call: Call) {
@@ -441,6 +451,6 @@ class CustomeSipManager @Inject constructor(
     }
 
     companion object {
-        private const val TAG = "SipManager"
+        private const val TAG = AppConstants.TAG_SIP_MANAGER
     }
 }

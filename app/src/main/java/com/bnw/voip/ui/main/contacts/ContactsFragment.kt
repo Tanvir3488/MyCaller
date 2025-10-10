@@ -1,6 +1,8 @@
 package com.bnw.voip.ui.main.contacts
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,6 +41,7 @@ class ContactsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
+        setupSearch()
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.contacts.collect {
@@ -55,6 +58,18 @@ class ContactsFragment : Fragment() {
             adapter = contactAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
+    }
+
+    private fun setupSearch() {
+        binding.searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                viewModel.searchContacts(s.toString())
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
     override fun onDestroyView() {

@@ -25,7 +25,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Voip">
         <activity
-            android:name=".ui.incommingcall.IncomingCallActivity"
+            android:name=".ui.incommingcall.CallingActivity"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
             android:excludeFromRecents="true"
