@@ -8,6 +8,9 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import android.content.Context
+import android.os.VibrationEffect
+import android.os.Vibrator
 import com.bnw.voip.R
 import com.bnw.voip.domain.usecase.call.GetCallStateUseCase
 import com.bnw.voip.domain.usecase.call.LoginUseCase
@@ -46,6 +49,7 @@ class CallService : Service() {
     lateinit var callNotificationManager: CallNotificationManager
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private lateinit var vibrator: Vibrator
 
     override fun onBind(intent: Intent?): IBinder? {
         // Not using binding here
@@ -54,16 +58,27 @@ class CallService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         startForegroundService()
         loginUseCase()
         startSipUseCase()
         callTracker.startTracking()
         serviceScope.launch {
             getCallStateUseCase().collect {
+                android.util.Log.d("CallService", "Call state received: ${it?.state}") // Added log
                 if (it?.state == Call.State.IncomingReceived) {
+                    android.util.Log.d("CallService", "Incoming call received, starting vibration") // Added log
                     callNotificationManager.showIncomingCall(it.call?.remoteAddress?.displayName ?: "Unknown")
-                }else if (it?.state == Call.State.End || it?.state == Call.State.Released) {
+                    val pattern = longArrayOf(0, 1000, 500) // Vibrate for 1s, pause for 0.5s
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0)) // Repeat from index 0
+                    } else {
+                        vibrator.vibrate(pattern, 0) // Repeat from index 0
+                    }
+                } else if (it?.state == Call.State.End || it?.state == Call.State.Released || it?.state == Call.State.Connected || it?.state == Call.State.StreamsRunning) {
+                    android.util.Log.d("CallService", "Call connected, ended or released, stopping vibration") // Added log
                     callNotificationManager.dismissNotification()
+                    vibrator.cancel()
                 }
             }
         }
@@ -107,6 +122,7 @@ class CallService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        vibrator.cancel()
         serviceScope.cancel()
     }
 }

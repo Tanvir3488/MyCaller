@@ -1,12 +1,8 @@
 package com.bnw.voip.ui.incommingcall
 
-import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
-import android.os.VibrationEffect
-import android.os.Vibrator
 import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
@@ -22,13 +18,11 @@ import org.linphone.core.Call
 class CallingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityIncomingCallBinding
     private val viewModel: IncomingCallViewModel by viewModels()
-    private lateinit var vibrator: Vibrator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityIncomingCallBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         Log.e("CallingActivity:", "onCreate ${intent?.action}")
         when (intent?.action) {
             AppConstants.ACTION_ANSWER_CALL -> {
@@ -82,27 +76,16 @@ class CallingActivity : AppCompatActivity() {
         viewModel.callState.observe(this) { state ->
             Log.e("CallingActivity:", "Call $state")
             when (state?.state) {
-                Call.State.IncomingReceived -> {
-                    val pattern = longArrayOf(0, 1000, 500) // Vibrate for 1s, pause for 0.5s
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0)) // Repeat from index 0
-                    } else {
-                        vibrator.vibrate(pattern, 0) // Repeat from index 0
-                    }
-                }
                 Call.State.Connected, Call.State.StreamsRunning -> {
-                    vibrator.cancel()
                     binding.tvTimer.base = SystemClock.elapsedRealtime()
                     binding.tvTimer.visibility = View.VISIBLE
                     binding.tvTimer.start()
                     viewModel.showOngoingCallNotification()
                 }
                 Call.State.End -> {
-                    vibrator.cancel()
                     finish()
                 }
                 Call.State.Released -> {
-                    vibrator.cancel()
                     finish()
                 }
                 else -> {
@@ -129,6 +112,5 @@ class CallingActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        vibrator.cancel()
     }
 }
