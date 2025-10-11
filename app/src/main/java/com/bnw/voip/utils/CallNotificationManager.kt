@@ -44,7 +44,7 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
         }
     }
 
-    fun showIncomingCall(callerName: String, callId: String = "") {
+    fun showIncomingCall(phoneNumber: String) {
         // Check notification permission first (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(
@@ -61,8 +61,8 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or
                 Intent.FLAG_ACTIVITY_CLEAR_TOP or
                 Intent.FLAG_ACTIVITY_SINGLE_TOP
-            putExtra(AppConstants.CALLER_NAME, callerName)
-            putExtra(AppConstants.CALL_ID, callId)
+            putExtra(AppConstants.PHONE_NUMBER, phoneNumber)
+            putExtra(AppConstants.CALL_TYPE, CALL_TYPE_INCOMING)
         }
 
         val fullScreenPendingIntent = PendingIntent.getActivity(
@@ -84,8 +84,7 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
         val answerIntent = Intent(context, CallingActivity::class.java).apply {
             action = AppConstants.ACTION_ANSWER_CALL
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            putExtra(AppConstants.CALLER_NAME, callerName)
-            putExtra(AppConstants.CALL_ID, callId)
+            putExtra(AppConstants.PHONE_NUMBER, phoneNumber)
             putExtra(AppConstants.CALL_TYPE, CALL_TYPE_INCOMING)
         }
         val answerPendingIntent = PendingIntent.getActivity(
@@ -99,7 +98,8 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
         val declineIntent = Intent(context, CallingActivity::class.java).apply {
             action = AppConstants.ACTION_DECLINE_CALL
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            putExtra(AppConstants.CALL_ID, callId)
+            putExtra(AppConstants.PHONE_NUMBER, phoneNumber)
+            putExtra(AppConstants.CALL_TYPE, CALL_TYPE_INCOMING)
         }
         val declinePendingIntent = PendingIntent.getActivity(
             context,
@@ -110,7 +110,7 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
 
         val notification = NotificationCompat.Builder(context, AppConstants.CALL_CHANNEL_ID)
             .setContentTitle(AppConstants.INCOMING_CALL_TITLE)
-            .setContentText("Call from $callerName")
+            .setContentText("Call from $phoneNumber")
             .setSmallIcon(R.drawable.ic_call)
             .setCategory(NotificationCompat.CATEGORY_CALL)
             .setPriority(NotificationCompat.PRIORITY_MAX) // MAX for full-screen

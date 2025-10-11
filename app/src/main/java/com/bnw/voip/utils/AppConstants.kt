@@ -2,7 +2,7 @@ package com.bnw.voip.utils
 
 object AppConstants {
     // Intent Keys
-    const val CALLER_NAME = "caller_name"
+    const val PHONE_NUMBER = "phone_number"
     const val CALL_ID = "call_id"
     const val CALL_TYPE = "Call_Type"
 

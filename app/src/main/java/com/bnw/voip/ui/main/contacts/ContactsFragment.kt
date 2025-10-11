@@ -46,6 +46,7 @@ class ContactsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.contacts.collect {
                 contactAdapter.submitList(it)
+                binding.contactsRecyclerView.scrollToPosition(0)
             }
         }
     }

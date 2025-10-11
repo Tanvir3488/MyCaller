@@ -1,5 +1,6 @@
 package com.bnw.voip.ui.incommingcall
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
@@ -34,7 +35,7 @@ class IncomingCallViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val callNotificationManager: CallNotificationManager
 ) : ViewModel() {
-
+    var isAcceptVisibleForFirstTime = true
     val callState = getCallStateUseCase().asLiveData()
 
     private val _callerName = MutableStateFlow(AppConstants.UNKNOWN_CALLER)
@@ -51,8 +52,12 @@ class IncomingCallViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val caller = savedStateHandle.get<String>(AppConstants.CALLER_NAME)
+            savedStateHandle.keys().forEach { key ->
+                Log.d("SavedStateHandle", "$key = ${savedStateHandle.get<String>(key)}")
+            }
+            val caller = savedStateHandle.get<String>(AppConstants.PHONE_NUMBER)
             val type = savedStateHandle.get<String>(AppConstants.CALL_TYPE)
+
             if (caller != null) {
                 _callerNumber.value = caller
                 val contact = getContactByNumberUseCase(caller)
@@ -69,10 +74,17 @@ class IncomingCallViewModel @Inject constructor(
 
         viewModelScope.launch {
             combine(callState.asFlow(), callType) { state: CallStateEvent?, type: String ->
-                val isAcceptVisible = type == AppConstants.CALL_TYPE_INCOMING && state?.state != Call.State.Connected && state?.state != Call.State.StreamsRunning
-                val declineText = if (type == AppConstants.CALL_TYPE_OUTGOING || state?.state == Call.State.Connected || state?.state == Call.State.StreamsRunning) "End" else "Decline"
+                Log.e("IncomingCallViewModel", "Call State: $type - ${state?.state}")
+                val isAcceptVisible =
+                    (type == AppConstants.CALL_TYPE_INCOMING && state?.state == Call.State.IncomingReceived )
+                val declineText =
+                    if ((type == AppConstants.CALL_TYPE_OUTGOING || state?.state != Call.State.IncomingReceived))  "End" else "Decline"
+                if (!isAcceptVisible){
+                    isAcceptVisibleForFirstTime = false
+                }
                 CallingUiState(isAcceptVisible, declineText)
-            }.collect { 
+
+            }.collect {
                 _uiState.value = it
             }
         }

@@ -302,7 +302,7 @@ class CustomeSipManager @Inject constructor(
 
         val intent = Intent(context, CallingActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            putExtra(AppConstants.CALLER_NAME, number)
+            putExtra(AppConstants.PHONE_NUMBER, number)
             putExtra(AppConstants.CALL_TYPE, AppConstants.CALL_TYPE_OUTGOING)
         }
         context.startActivity(intent)
