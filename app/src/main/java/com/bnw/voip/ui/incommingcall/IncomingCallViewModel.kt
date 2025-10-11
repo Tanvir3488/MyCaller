@@ -44,6 +44,9 @@ class IncomingCallViewModel @Inject constructor(
     private val _callerNumber = MutableStateFlow("")
     val callerNumber: StateFlow<String> = _callerNumber
 
+    private val _photoUri = MutableStateFlow<String?>(null)
+    val photoUri: StateFlow<String?> = _photoUri
+
     private val _callType = MutableStateFlow("")
     val callType: StateFlow<String> = _callType
 
@@ -64,6 +67,7 @@ class IncomingCallViewModel @Inject constructor(
                 Log.e("IncomingCallViewModel", "Fetched contact: $contact for number: $caller")
                 if (contact != null) {
                     _callerName.value = contact.name
+                    _photoUri.value = contact.photoUri
                 } else {
                     _callerName.value = AppConstants.UNKNOWN_CALLER
                 }
@@ -75,9 +79,10 @@ class IncomingCallViewModel @Inject constructor(
 
         viewModelScope.launch {
             combine(callState.asFlow(), callType) { state: CallStateEvent?, type: String ->
-               // Log.e("IncomingCallViewModel", "Call State: $type - ${state?.state}")
+
                 val isAcceptVisible =
                     (type == AppConstants.CALL_TYPE_INCOMING && state?.state == Call.State.IncomingReceived )
+                Log.e("IncomingCallViewModel", " $isAcceptVisible Call State: $type - ${state?.state}")
                 val declineText =
                     if ((type == AppConstants.CALL_TYPE_OUTGOING || state?.state != Call.State.IncomingReceived))  "End" else "Decline"
                 if (!isAcceptVisible){

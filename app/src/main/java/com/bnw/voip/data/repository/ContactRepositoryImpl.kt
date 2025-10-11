@@ -28,43 +28,66 @@ class ContactRepositoryImpl @Inject constructor(
 
     @SuppressLint("Range")
     override suspend fun syncContacts() {
-        val deviceContacts = mutableMapOf<String, MutableList<String>>()
+        val sharedPreferences = context.getSharedPreferences("voip_prefs", Context.MODE_PRIVATE)
+        val lastSyncTimestamp = sharedPreferences.getLong("last_sync_timestamp", 0)
+
+        val deviceContacts = mutableListOf<Contact>()
         val contentResolver = context.contentResolver
+        val selection = "${ContactsContract.Contacts.CONTACT_LAST_UPDATED_TIMESTAMP} > ?"
+        val selectionArgs = arrayOf(lastSyncTimestamp.toString())
+
         val cursor = contentResolver.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
             null,
-            null,
-            null,
+            selection,
+            selectionArgs,
             null
         )
 
         cursor?.use {
             while (it.moveToNext()) {
+                val id = it.getLong(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID))
                 val name = it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
                 val phoneNumber = it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+                val photoUri = it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI))
+                val lastUpdated = it.getLong(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_LAST_UPDATED_TIMESTAMP))
                 val normalizedPhoneNumber = phoneNumber.replace("[^0-9+]".toRegex(), "").replace(" ", "").trim()
-                deviceContacts.getOrPut(name) { mutableListOf() }.add(normalizedPhoneNumber)
+
+                val existingContact = deviceContacts.find { c -> c.deviceContactId == id }
+                if (existingContact != null) {
+                    val updatedPhoneNumbers = existingContact.phoneNumbers.toMutableList()
+                    if (!updatedPhoneNumbers.contains(normalizedPhoneNumber)) {
+                        updatedPhoneNumbers.add(normalizedPhoneNumber)
+                    }
+                    val index = deviceContacts.indexOf(existingContact)
+                    deviceContacts[index] = existingContact.copy(phoneNumbers = updatedPhoneNumbers)
+                } else {
+                    deviceContacts.add(
+                        Contact(
+                            deviceContactId = id,
+                            name = name,
+                            phoneNumbers = listOf(normalizedPhoneNumber),
+                            photoUri = photoUri,
+                            lastUpdatedTimestamp = lastUpdated
+                        )
+                    )
+                }
             }
         }
         cursor?.close()
 
-        for ((name, phoneNumbers) in deviceContacts) {
-            val existingContact = contactDao.getContactByName(name)
+        for (contact in deviceContacts) {
+            val existingContact = contactDao.getContactByDeviceContactId(contact.deviceContactId)
             if (existingContact == null) {
-                contactDao.insert(Contact(name = name, phoneNumbers = phoneNumbers))
+                contactDao.insert(contact)
             } else {
-                val updatedPhoneNumbers = existingContact.phoneNumbers.toMutableList()
-                var hasChanges = false
-                for (phoneNumber in phoneNumbers) {
-                    if (!updatedPhoneNumbers.contains(phoneNumber)) {
-                        updatedPhoneNumbers.add(phoneNumber)
-                        hasChanges = true
-                    }
-                }
-                if (hasChanges) {
-                    contactDao.insert(existingContact.copy(phoneNumbers = updatedPhoneNumbers))
-                }
+                contactDao.update(contact.copy(id = existingContact.id))
             }
+        }
+
+        with(sharedPreferences.edit()) {
+            putLong("last_sync_timestamp", System.currentTimeMillis())
+            apply()
         }
     }
 }

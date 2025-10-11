@@ -5,7 +5,20 @@
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:fitsSystemWindows="false"
+    android:background="@drawable/bg_gradient_dark">
+
+    <!-- Avatar -->
+    <ImageView
+        android:id="@+id/ivAvatar"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="100dp"
+        android:src="@drawable/ic_launcher_foreground"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@drawable/circle_background"/>
 
     <!-- Caller Name -->
     <TextView
@@ -13,20 +26,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Unknown"
-        android:textSize="28sp"
+        android:textSize="32sp"
         android:textColor="@android:color/white"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivAvatar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="48dp"/>
+        android:layout_marginTop="24dp"/>
 
     <!-- Caller Number -->
     <TextView
         android:id="@+id/tvCallerNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="22sp"
+        android:textSize="24sp"
         android:textColor="@android:color/white"
         app:layout_constraintTop_toBottomOf="@id/tvCallerName"
         app:layout_constraintStart_toStartOf="parent"
@@ -38,40 +51,45 @@
         android:id="@+id/tvTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="30sp"
+        android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="@android:color/holo_green_light"
+        android:textColor="@android:color/white"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/tvCallerNumber"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="16dp"/>
 
-    <!-- Accept Button -->
-    <Button
-        android:id="@+id/btnAccept"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:text="Accept"
-        android:textColor="@android:color/white"
-        android:backgroundTint="@android:color/holo_green_dark"
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnDecline"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        android:layout_marginBottom="48dp"/>
+        android:layout_marginBottom="64dp">
 
-    <!-- Decline Button -->
-    <Button
-        android:id="@+id/btnDecline"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:text="Decline"
-        android:textColor="@android:color/white"
-        android:backgroundTint="@android:color/holo_red_dark"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btnAccept"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="48dp"/>
+        <!-- Accept Button -->
+        <ImageButton
+            android:id="@+id/btnAccept"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_call"
+            android:background="@drawable/bg_circle_green_call"
+            app:tint="@android:color/white"
+            android:layout_marginHorizontal="32dp"/>
+
+        <!-- Decline Button -->
+        <ImageButton
+            android:id="@+id/btnDecline"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_call"
+            android:rotation="135"
+            android:background="@drawable/bg_circle_red_call"
+            app:tint="@android:color/white"
+            android:layout_marginHorizontal="32dp"/>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

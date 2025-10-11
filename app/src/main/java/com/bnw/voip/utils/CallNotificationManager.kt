@@ -119,7 +119,6 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
             .setContentIntent(contentIntent)
             .setFullScreenIntent(fullScreenPendingIntent, true) // Critical for lock screen
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC) // Show on lock screen
-            .setVibrate(longArrayOf(0, 1000, 500, 1000)) // Vibration pattern
             .setSound(null) // Use your custom ringtone if needed
             .addAction(
                 R.drawable.ic_call,

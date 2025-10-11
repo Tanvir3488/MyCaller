@@ -10,6 +10,9 @@ import com.bnw.voip.data.db.converter.StringListConverter
 data class Contact(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val deviceContactId: Long,
     val name: String,
-    val phoneNumbers: List<String>
+    val phoneNumbers: List<String>,
+    val photoUri: String?,
+    val lastUpdatedTimestamp: Long
 )

@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -31,11 +32,20 @@ class ContactAdapter(
         fun bind(contact: Contact) {
             binding.contactName.text = contact.name
             binding.contactNumber.text = contact.phoneNumbers.firstOrNull()
-            binding.contactInitial.text = contact.name.first().toString()
 
-            val randomColor = getRandomColor()
-            val background = binding.contactInitial.background as GradientDrawable
-            background.setColor(randomColor)
+            if (contact.photoUri != null) {
+                binding.contactPhoto.visibility = View.VISIBLE
+                binding.contactInitial.visibility = View.GONE
+                binding.contactPhoto.setImageURI(android.net.Uri.parse(contact.photoUri))
+            } else {
+                binding.contactPhoto.visibility = View.GONE
+                binding.contactInitial.visibility = View.VISIBLE
+                binding.contactInitial.text = contact.name.first().toString()
+                val randomColor = getRandomColor()
+                val background = binding.contactInitial.background as? GradientDrawable ?: GradientDrawable()
+                background.setColor(randomColor)
+                binding.contactInitial.background = background
+            }
 
             binding.callButton.setOnClickListener {
                 if (contact.phoneNumbers.size == 1) {

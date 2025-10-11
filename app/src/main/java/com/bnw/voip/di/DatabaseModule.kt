@@ -2,6 +2,8 @@ package com.bnw.voip.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.bnw.voip.data.db.CallLogsDao
 import com.bnw.voip.data.db.ContactDao
 import com.bnw.voip.data.db.VoipDatabase
@@ -16,6 +18,14 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
+    val MIGRATION_1_2 = object : Migration(1, 2) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE contacts ADD COLUMN deviceContactId INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE contacts ADD COLUMN photoUri TEXT")
+            database.execSQL("ALTER TABLE contacts ADD COLUMN lastUpdatedTimestamp INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+
     @Provides
     @Singleton
     fun provideVoipDatabase(@ApplicationContext context: Context): VoipDatabase {
@@ -23,7 +33,7 @@ object DatabaseModule {
             context,
             VoipDatabase::class.java,
             "voip_database"
-        ).fallbackToDestructiveMigration().build()
+        ).addMigrations(MIGRATION_1_2).build()
     }
 
     @Provides
