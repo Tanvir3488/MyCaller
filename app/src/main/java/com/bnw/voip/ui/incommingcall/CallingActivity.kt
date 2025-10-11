@@ -1,5 +1,6 @@
 package com.bnw.voip.ui.incommingcall
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
@@ -22,7 +23,7 @@ class CallingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityIncomingCallBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        Log.e("CallingActivity:", "onCreate ${intent?.action}")
         when (intent?.action) {
             AppConstants.ACTION_ANSWER_CALL -> {
                 viewModel.answerCall()
@@ -66,6 +67,7 @@ class CallingActivity : AppCompatActivity() {
                     binding.tvTimer.base = SystemClock.elapsedRealtime()
                     binding.tvTimer.visibility = View.VISIBLE
                     binding.tvTimer.start()
+                    viewModel.showOngoingCallNotification()
                 }
                 Call.State.End -> {
                     finish()
@@ -79,6 +81,21 @@ class CallingActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        when (intent.action) {
+            AppConstants.ACTION_ANSWER_CALL -> {
+                viewModel.answerCall()
+            }
+            AppConstants.ACTION_DECLINE_CALL -> {
+                viewModel.hangupCall()
+            }
+        }
+    }
+
+
 
     override fun onDestroy() {
         super.onDestroy()

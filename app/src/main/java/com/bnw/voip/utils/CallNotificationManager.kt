@@ -137,6 +137,57 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
         manager.notify(AppConstants.CALL_NOTIFICATION_ID, notification)
     }
 
+    fun showOngoingCallNotification(contactName: String?, phoneNumber: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return
+            }
+        }
+
+        val declineIntent = Intent(context, CallingActivity::class.java).apply {
+            action = AppConstants.ACTION_DECLINE_CALL
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        val declinePendingIntent = PendingIntent.getActivity(
+            context,
+            3,
+            declineIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val contentIntent = Intent(context, CallingActivity::class.java)
+        val contentPendingIntent = PendingIntent.getActivity(
+            context,
+            4,
+            contentIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, AppConstants.CALL_CHANNEL_ID)
+            .setContentTitle(contactName ?: phoneNumber)
+            .setContentText("Ongoing Call")
+            .setSmallIcon(R.drawable.ic_call)
+            .setCategory(NotificationCompat.CATEGORY_CALL)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setOngoing(true)
+            .setAutoCancel(false)
+            .setUsesChronometer(true) // This will show the timer
+            .setContentIntent(contentPendingIntent)
+            .addAction(
+                R.drawable.ic_call,
+                "Hang Up",
+                declinePendingIntent
+            )
+            .build()
+
+        val manager = NotificationManagerCompat.from(context)
+        manager.notify(AppConstants.CALL_NOTIFICATION_ID, notification)
+    }
+
     fun dismissNotification() {
         val manager = NotificationManagerCompat.from(context)
         manager.cancel(AppConstants.CALL_NOTIFICATION_ID)

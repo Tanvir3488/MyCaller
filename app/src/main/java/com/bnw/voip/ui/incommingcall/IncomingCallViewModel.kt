@@ -32,8 +32,8 @@ class IncomingCallViewModel @Inject constructor(
     private val hangupCallUseCase: HangupCallUseCase,
     getCallStateUseCase: GetCallStateUseCase,
     private val getContactByNumberUseCase: GetContactByNumberUseCase,
-    private val savedStateHandle: SavedStateHandle,
-    private val callNotificationManager: CallNotificationManager
+    private val callNotificationManager: CallNotificationManager,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     var isAcceptVisibleForFirstTime = true
     val callState = getCallStateUseCase().asLiveData()
@@ -61,6 +61,7 @@ class IncomingCallViewModel @Inject constructor(
             if (caller != null) {
                 _callerNumber.value = caller
                 val contact = getContactByNumberUseCase(caller)
+                Log.e("IncomingCallViewModel", "Fetched contact: $contact for number: $caller")
                 if (contact != null) {
                     _callerName.value = contact.name
                 } else {
@@ -74,7 +75,7 @@ class IncomingCallViewModel @Inject constructor(
 
         viewModelScope.launch {
             combine(callState.asFlow(), callType) { state: CallStateEvent?, type: String ->
-                Log.e("IncomingCallViewModel", "Call State: $type - ${state?.state}")
+               // Log.e("IncomingCallViewModel", "Call State: $type - ${state?.state}")
                 val isAcceptVisible =
                     (type == AppConstants.CALL_TYPE_INCOMING && state?.state == Call.State.IncomingReceived )
                 val declineText =
@@ -98,5 +99,14 @@ class IncomingCallViewModel @Inject constructor(
     fun hangupCall() {
         hangupCallUseCase()
         callNotificationManager.dismissNotification()
+    }
+
+    fun showOngoingCallNotification() {
+        viewModelScope.launch {
+            val contact = getContactByNumberUseCase(callerNumber.value)
+            val name = contact?.name
+            Log.e("IncomingCallViewModel", "showOngoingCallNotification: $name - ${callerNumber.value}")
+            callNotificationManager.showOngoingCallNotification(name, callerNumber.value)
+        }
     }
 }
