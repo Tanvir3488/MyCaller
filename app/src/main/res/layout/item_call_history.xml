@@ -28,9 +28,10 @@
             android:layout_marginStart="16dp"
             android:text="Caller Name"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@id/callTypeIcon"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/callTimestamp"/>
+            app:layout_constraintEnd_toStartOf="@id/callAgainButton"/>
 
         <TextView
             android:id="@+id/phoneNumber"
@@ -41,14 +42,34 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             app:layout_constraintStart_toEndOf="@id/callTypeIcon"
             app:layout_constraintTop_toBottomOf="@+id/callerName"
-            app:layout_constraintEnd_toStartOf="@+id/callTimestamp"/>
+            app:layout_constraintEnd_toStartOf="@id/callAgainButton"/>
 
         <TextView
-            android:id="@+id/callTimestamp"
+            android:id="@+id/callDateTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:text="10:00 AM"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            app:layout_constraintStart_toEndOf="@id/callTypeIcon"
+            app:layout_constraintTop_toBottomOf="@+id/phoneNumber"/>
+
+        <TextView
+            android:id="@+id/callDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2 min"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            app:layout_constraintStart_toEndOf="@+id/callDateTime"
+            app:layout_constraintTop_toBottomOf="@+id/phoneNumber"
+            android:layout_marginStart="8dp"/>
+
+        <ImageButton
+            android:id="@+id/callAgainButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_call"
+            android:background="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>

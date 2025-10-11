@@ -25,7 +25,9 @@ class CallHistoryFragment : Fragment() {
         _binding = FragmentCallHistoryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
 
-        val adapter = CallHistoryAdapter()
+        val adapter = CallHistoryAdapter(){
+           /// viewModel.callNumber(it)
+        }
         binding.callHistoryRecyclerView.adapter = adapter
 
         viewModel.callHistory.observe(viewLifecycleOwner) {
