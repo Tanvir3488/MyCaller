@@ -14,12 +14,16 @@ class ContactRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ContactRepository {
 
-    override fun getContacts(): Flow<List<Contact>> {
-        return contactDao.getAll()
+    override suspend fun getContacts(limit: Int, offset: Int): List<Contact> {
+        return contactDao.getContacts(limit, offset)
     }
 
-    override fun searchContacts(query: String): Flow<List<Contact>> {
-        return contactDao.searchContacts(query)
+    override suspend fun getContacts(): Flow<List<Contact>> {
+        return contactDao.getContacts()
+    }
+
+    override suspend fun searchContacts(query: String, limit: Int, offset: Int): List<Contact> {
+        return contactDao.searchContacts(query, limit, offset)
     }
 
     override suspend fun getContactByNumber(number: String): Contact? {
@@ -51,7 +55,7 @@ class ContactRepositoryImpl @Inject constructor(
                 val phoneNumber = it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
                 val photoUri = it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI))
                 val lastUpdated = it.getLong(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_LAST_UPDATED_TIMESTAMP))
-                val normalizedPhoneNumber = phoneNumber.replace("[^0-9+]".toRegex(), "").replace(" ", "").trim()
+                val normalizedPhoneNumber = phoneNumber.replace("[^0-9+]", "").toRegex().replace(" ", "").trim()
 
                 val existingContact = deviceContacts.find { c -> c.deviceContactId == id }
                 if (existingContact != null) {

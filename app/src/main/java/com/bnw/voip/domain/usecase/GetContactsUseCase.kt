@@ -2,17 +2,16 @@ package com.bnw.voip.domain.usecase
 
 import com.bnw.voip.data.entity.Contact
 import com.bnw.voip.data.repository.ContactRepository
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetContactsUseCase @Inject constructor(
     private val contactRepository: ContactRepository
 ) {
-    operator fun invoke(query: String): Flow<List<Contact>> {
+    suspend operator fun invoke(query: String, limit: Int, offset: Int): List<Contact> {
         return if (query.isBlank()) {
-            contactRepository.getContacts()
+            contactRepository.getContacts(limit, offset)
         } else {
-            contactRepository.searchContacts(query)
+            contactRepository.searchContacts(query, limit, offset)
         }
     }
 }

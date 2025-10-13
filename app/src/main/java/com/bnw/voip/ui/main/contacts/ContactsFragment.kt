@@ -8,8 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bnw.voip.databinding.FragmentContactsBinding
 import com.bnw.voip.voip.CustomeSipManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,40 +40,40 @@ class ContactsFragment : Fragment() {
         return binding.root
     }
 
-        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-            super.onViewCreated(view, savedInstanceState)
+        setupRecyclerView()
+        setupSearch()
 
-    
-
-            setupRecyclerView()
-
-            setupSearch()
-
-    
-
-            viewLifecycleOwner.lifecycleScope.launch {
-
-                viewModel.contacts.collect { 
-
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.contacts.collect {
                     contactAdapter.submitList(it)
-
-                    binding.contactsRecyclerView.scrollToPosition(0)
-
                 }
-
             }
-
         }
+    }
 
     private fun setupRecyclerView() {
         contactAdapter = ContactAdapter { phoneNumber ->
             sipManager.call(phoneNumber)
         }
-        binding.contactsRecyclerView.apply {
-            adapter = contactAdapter
-            layoutManager = LinearLayoutManager(requireContext())
-        }
+        val layoutManager = LinearLayoutManager(requireContext())
+        binding.contactsRecyclerView.layoutManager = layoutManager
+        binding.contactsRecyclerView.adapter = contactAdapter
+        binding.contactsRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val visibleItemCount = layoutManager.childCount
+                val totalItemCount = layoutManager.itemCount
+                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
+                    viewModel.loadMoreContacts()
+                }
+            }
+        })
     }
 
     private fun setupSearch() {
