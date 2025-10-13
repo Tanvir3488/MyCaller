@@ -55,7 +55,10 @@ class ContactRepositoryImpl @Inject constructor(
                 val phoneNumber = it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
                 val photoUri = it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI))
                 val lastUpdated = it.getLong(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_LAST_UPDATED_TIMESTAMP))
-                val normalizedPhoneNumber = phoneNumber.replace("[^0-9+]", "").toRegex().replace(" ", "").trim()
+                val normalizedPhoneNumber = phoneNumber
+                    .replace(Regex("[^0-9+]"), "") // remove everything except digits and +
+                    .replace(" ", "")              // remove spaces
+                    .trim()
 
                 val existingContact = deviceContacts.find { c -> c.deviceContactId == id }
                 if (existingContact != null) {
