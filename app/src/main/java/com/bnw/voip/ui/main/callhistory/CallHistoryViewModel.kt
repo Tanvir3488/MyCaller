@@ -6,10 +6,14 @@ import androidx.lifecycle.viewModelScope
 import com.bnw.voip.data.entity.CallLogs
 import com.bnw.voip.data.repository.ContactRepository
 import com.bnw.voip.domain.usecase.GetCallLogsUseCase
+import com.bnw.voip.domain.usecase.call.MakeCallUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class CallLogItem(
@@ -20,8 +24,12 @@ data class CallLogItem(
 @HiltViewModel
 class CallHistoryViewModel @Inject constructor(
     getCallLogsUseCase: GetCallLogsUseCase,
-    contactRepository: ContactRepository
+    contactRepository: ContactRepository,
+    private val makeCallUseCase: MakeCallUseCase
 ) : ViewModel() {
+
+    private val _navigationEvents = MutableSharedFlow<String>()
+    val navigationEvents = _navigationEvents.asSharedFlow()
 
     val callHistory = combine(
         getCallLogsUseCase(),
@@ -37,4 +45,11 @@ class CallHistoryViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
         .asLiveData()
+
+    fun callNumber(number: String) {
+        viewModelScope.launch {
+            makeCallUseCase(number)
+            _navigationEvents.emit(number)
+        }
+    }
 }

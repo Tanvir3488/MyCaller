@@ -9,6 +9,8 @@ object AppConstants {
     // Call Types
     const val CALL_TYPE_OUTGOING = "OUTGOING"
     const val CALL_TYPE_INCOMING = "INCOMING"
+    const val CALL_TYPE_ANSWERED = "answered"
+    const val CALL_TYPE_MISSED = "missed"
 
     // Notification Constants
     const val CALL_CHANNEL_ID = "call_channel1"

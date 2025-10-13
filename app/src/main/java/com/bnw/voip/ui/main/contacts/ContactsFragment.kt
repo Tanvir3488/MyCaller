@@ -37,19 +37,31 @@ class ContactsFragment : Fragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
-        setupRecyclerView()
-        setupSearch()
+            super.onViewCreated(view, savedInstanceState)
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.contacts.collect {
-                contactAdapter.submitList(it)
-                binding.contactsRecyclerView.scrollToPosition(0)
+    
+
+            setupRecyclerView()
+
+            setupSearch()
+
+    
+
+            viewLifecycleOwner.lifecycleScope.launch {
+
+                viewModel.contacts.collect { 
+
+                    contactAdapter.submitList(it)
+
+                    binding.contactsRecyclerView.scrollToPosition(0)
+
+                }
+
             }
+
         }
-    }
 
     private fun setupRecyclerView() {
         contactAdapter = ContactAdapter { phoneNumber ->

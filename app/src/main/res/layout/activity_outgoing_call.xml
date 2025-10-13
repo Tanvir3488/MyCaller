@@ -8,27 +8,16 @@
     tools:context=".ui.outgoingcall.OutgoingCallActivity">
 
     <TextView
-        android:id="@+id/callerName"
+        android:id="@+id/phoneNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="128dp"
-        android:text="Caller Name"
+        android:text=""
         android:textColor="@android:color/white"
         android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <Chronometer
-        android:id="@+id/callDuration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:textColor="@android:color/white"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/callerName" />
 
     <ImageButton
         android:id="@+id/endCallButton"
