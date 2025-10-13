@@ -7,12 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bnw.voip.databinding.FragmentCallHistoryBinding
 import com.bnw.voip.ui.incommingcall.CallingActivity
 import com.bnw.voip.utils.AppConstants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -34,20 +39,39 @@ class CallHistoryFragment : Fragment() {
         val adapter = CallHistoryAdapter(){
             viewModel.callNumber(it)
         }
+        val layoutManager = LinearLayoutManager(requireContext())
+        binding.callHistoryRecyclerView.layoutManager = layoutManager
         binding.callHistoryRecyclerView.adapter = adapter
 
-        viewModel.callHistory.observe(viewLifecycleOwner) {
-            it?.let {
-                adapter.submitList(it)
+        binding.callHistoryRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val visibleItemCount = layoutManager.childCount
+                val totalItemCount = layoutManager.itemCount
+                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
+                    viewModel.loadMoreCallLogs()
+                }
+            }
+        })
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.callHistory.collect {
+                    adapter.submitList(it)
+                }
             }
         }
 
-        lifecycleScope.launchWhenStarted {
-            viewModel.navigationEvents.collect {
-                val intent = Intent(requireContext(), CallingActivity::class.java).apply {
-                    putExtra(AppConstants.PHONE_NUMBER, it)
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.navigationEvents.collect {
+                    val intent = Intent(requireContext(), CallingActivity::class.java).apply {
+                        putExtra(AppConstants.PHONE_NUMBER, it)
+                    }
+                    startActivity(intent)
                 }
-                startActivity(intent)
             }
         }
 

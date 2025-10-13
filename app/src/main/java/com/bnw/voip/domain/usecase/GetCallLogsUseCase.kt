@@ -6,5 +6,5 @@ import javax.inject.Inject
 class GetCallLogsUseCase @Inject constructor(
     private val callLogRepository: CallLogRepository
 ) {
-    operator fun invoke() = callLogRepository.getCallLogs()
+    suspend operator fun invoke(limit: Int, offset: Int) = callLogRepository.getCallLogs(limit, offset)
 }

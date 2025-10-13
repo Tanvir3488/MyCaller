@@ -41,6 +41,9 @@ class CallHistoryAdapter(
             val minutes = durationInSeconds / 60
             val seconds = durationInSeconds % 60
             val formattedDuration = String.format("%02d:%02d min", minutes, seconds)
+            if (durationInSeconds==0L){
+              binding.callDuration.visibility = android.view.View.GONE
+            }
             binding.callDuration.text = formattedDuration
             binding.callDateTime.text = formatDateTime(item.callLog.callStartTime)
             binding.callType.text = item.callLog.callType.uppercase(Locale.ROOT)
