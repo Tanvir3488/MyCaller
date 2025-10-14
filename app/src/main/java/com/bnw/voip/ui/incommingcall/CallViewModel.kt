@@ -13,6 +13,7 @@ import com.bnw.voip.domain.usecase.call.HangupCallUseCase
 import com.bnw.voip.utils.AppConstants
 import com.bnw.voip.utils.CallNotificationManager
 import com.bnw.voip.voip.CallStateEvent
+import com.bnw.voip.voip.CallTracker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,10 +34,13 @@ class IncomingCallViewModel @Inject constructor(
     getCallStateUseCase: GetCallStateUseCase,
     private val getContactByNumberUseCase: GetContactByNumberUseCase,
     private val callNotificationManager: CallNotificationManager,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val callTracker: CallTracker
 ) : ViewModel() {
     var isAcceptVisibleForFirstTime = true
     val callState = getCallStateUseCase().asLiveData()
+    val callConnectedTime: StateFlow<Long?> = callTracker.callConnectedTime
+    val callConnectedWallTime: StateFlow<Long?> = callTracker.callConnectedWallTime
 
     private val _callerName = MutableStateFlow(AppConstants.UNKNOWN_CALLER)
     val callerName: StateFlow<String> = _callerName
@@ -110,8 +114,9 @@ class IncomingCallViewModel @Inject constructor(
         viewModelScope.launch {
             val contact = getContactByNumberUseCase(callerNumber.value)
             val name = contact?.name
-            Log.e("IncomingCallViewModel", "showOngoingCallNotification: $name - ${callerNumber.value}")
-            callNotificationManager.showOngoingCallNotification(name, callerNumber.value)
+            callConnectedWallTime.value?.let {
+                callNotificationManager.showOngoingCallNotification(name, callerNumber.value, it)
+            }
         }
     }
 }

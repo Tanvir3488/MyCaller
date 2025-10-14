@@ -41,6 +41,15 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
             }
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
+
+            val missedCallChannel = NotificationChannel(
+                AppConstants.MISSED_CALL_CHANNEL_ID,
+                AppConstants.MISSED_CALL_CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = AppConstants.MISSED_CALL_CHANNEL_DESCRIPTION
+            }
+            manager.createNotificationChannel(missedCallChannel)
         }
     }
 
@@ -136,7 +145,7 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
         manager.notify(AppConstants.CALL_NOTIFICATION_ID, notification)
     }
 
-    fun showOngoingCallNotification(contactName: String?, phoneNumber: String) {
+    fun showOngoingCallNotification(contactName: String?, phoneNumber: String, connectedWallTime: Long) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(
                     context,
@@ -158,7 +167,10 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val contentIntent = Intent(context, CallingActivity::class.java)
+        val contentIntent = Intent(context, CallingActivity::class.java).apply {
+            putExtra(AppConstants.PHONE_NUMBER, phoneNumber)
+            putExtra(AppConstants.CALL_TYPE, AppConstants.CALL_TYPE_ONGOING)
+        }
         val contentPendingIntent = PendingIntent.getActivity(
             context,
             4,
@@ -174,6 +186,7 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setOngoing(true)
             .setAutoCancel(false)
+            .setWhen(connectedWallTime)
             .setUsesChronometer(true) // This will show the timer
             .setContentIntent(contentPendingIntent)
             .addAction(
@@ -182,9 +195,39 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
                 declinePendingIntent
             )
             .build()
+        notification.flags = notification.flags or Notification.FLAG_ONGOING_EVENT
 
         val manager = NotificationManagerCompat.from(context)
         manager.notify(AppConstants.CALL_NOTIFICATION_ID, notification)
+    }
+
+    fun showMissedCallNotification(contactName: String?, phoneNumber: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return
+            }
+        }
+
+        val intent = Intent(context, com.bnw.voip.ui.main.MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+        val notification = NotificationCompat.Builder(context, AppConstants.MISSED_CALL_CHANNEL_ID)
+            .setContentTitle("Missed Call")
+            .setContentText(contactName ?: phoneNumber)
+            .setSmallIcon(R.drawable.ic_call)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        val manager = NotificationManagerCompat.from(context)
+        manager.notify(AppConstants.MISSED_CALL_NOTIFICATION_ID, notification)
     }
 
     fun dismissNotification() {

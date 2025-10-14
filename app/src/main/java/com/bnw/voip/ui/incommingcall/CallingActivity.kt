@@ -77,10 +77,12 @@ class CallingActivity : AppCompatActivity() {
             Log.e("CallingActivity:", "Call $state")
             when (state?.state) {
                 Call.State.Connected, Call.State.StreamsRunning -> {
-                    binding.tvTimer.base = SystemClock.elapsedRealtime()
-                    binding.tvTimer.visibility = View.VISIBLE
-                    binding.tvTimer.start()
-                    viewModel.showOngoingCallNotification()
+                    viewModel.callConnectedTime.value?.let {
+                        binding.tvTimer.base = it
+                        binding.tvTimer.visibility = View.VISIBLE
+                        binding.tvTimer.start()
+                        viewModel.showOngoingCallNotification()
+                    }
                 }
                 Call.State.End -> {
                     finish()
@@ -90,6 +92,16 @@ class CallingActivity : AppCompatActivity() {
                 }
                 else -> {
                     // Handle other states if needed
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.callConnectedTime.collect { time ->
+                if (time != null) {
+                    binding.tvTimer.base = time
+                    binding.tvTimer.visibility = View.VISIBLE
+                    binding.tvTimer.start()
                 }
             }
         }

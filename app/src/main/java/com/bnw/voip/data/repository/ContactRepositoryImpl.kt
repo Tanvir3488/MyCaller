@@ -14,16 +14,12 @@ class ContactRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ContactRepository {
 
-    override suspend fun getContacts(limit: Int, offset: Int): List<Contact> {
-        return contactDao.getContacts(limit, offset)
-    }
-
-    override suspend fun getContacts(): Flow<List<Contact>> {
+    override fun getContacts(): Flow<List<Contact>> {
         return contactDao.getContacts()
     }
 
-    override suspend fun searchContacts(query: String, limit: Int, offset: Int): List<Contact> {
-        return contactDao.searchContacts(query, limit, offset)
+    override suspend fun searchContacts(query: String): List<Contact> {
+        return contactDao.searchContacts(query)
     }
 
     override suspend fun getContactByNumber(number: String): Contact? {

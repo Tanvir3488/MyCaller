@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,37 +35,20 @@ class CallHistoryViewModel @Inject constructor(
     private val _callHistory = MutableStateFlow<List<CallLogItem>>(emptyList())
     val callHistory = _callHistory.asStateFlow()
 
-    private var offset = 0
-    private val pageSize = 20
-    private var isLoading = false
-    private var isLastPage = false
-
     init {
-        loadMoreCallLogs()
-    }
-
-    fun loadMoreCallLogs() {
-        if (isLoading || isLastPage) return
-
-        viewModelScope.launch {
-            isLoading = true
-            val newLogs = getCallLogsUseCase(pageSize, offset)
-            if (newLogs.size < pageSize) {
-                isLastPage = true
-            }
-            val contacts = contactRepository.getContacts().first()
-            val newCallLogItems = newLogs.map { callLog ->
-                val contact = contacts.find { contact ->
-                    contact.phoneNumbers.any { phoneNumber ->
-                        phoneNumber == callLog.phoneNumber
+        getCallLogsUseCase()
+            .combine(contactRepository.getContacts()) { logs, contacts ->
+                logs.map { callLog ->
+                    val contact = contacts.find { contact ->
+                        contact.phoneNumbers.any { phoneNumber ->
+                            phoneNumber == callLog.phoneNumber
+                        }
                     }
+                    CallLogItem(callLog, contact?.name)
                 }
-                CallLogItem(callLog, contact?.name)
             }
-            _callHistory.value += newCallLogItems
-            offset += newLogs.size
-            isLoading = false
-        }
+            .onEach { _callHistory.value = it }
+            .launchIn(viewModelScope)
     }
 
     fun callNumber(number: String) {

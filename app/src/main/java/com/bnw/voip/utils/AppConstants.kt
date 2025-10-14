@@ -11,6 +11,8 @@ object AppConstants {
     const val CALL_TYPE_INCOMING = "INCOMING"
     const val CALL_TYPE_ANSWERED = "answered"
     const val CALL_TYPE_MISSED = "missed"
+    const val CALL_TYPE_ONGOING = "ONGOING"
+    const val CALL_TYPE_UNANSWERED = "unanswered"
 
     // Notification Constants
     const val CALL_CHANNEL_ID = "call_channel1"
@@ -20,6 +22,11 @@ object AppConstants {
     const val ACTION_ANSWER_CALL = "ACTION_ANSWER_CALL"
     const val ACTION_DECLINE_CALL = "ACTION_DECLINE_CALL"
     const val INCOMING_CALL_TITLE = "Incoming Call"
+
+    const val MISSED_CALL_CHANNEL_ID = "missed_call_channel"
+    const val MISSED_CALL_NOTIFICATION_ID = 1004
+    const val MISSED_CALL_CHANNEL_NAME = "Missed Calls"
+    const val MISSED_CALL_CHANNEL_DESCRIPTION = "Notifications for missed calls"
 
     // UI Constants
     const val UNKNOWN_CALLER = "Unknown"

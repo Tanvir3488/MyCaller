@@ -17,11 +17,8 @@ interface ContactDao {
     @Update
     suspend fun update(contact: Contact)
 
-    @Query("SELECT * FROM contacts WHERE REPLACE(name, ' ', '') LIKE '%' || REPLACE(:query, ' ', '') || '%' OR phoneNumbers LIKE '%' || :query || '%' LIMIT :limit OFFSET :offset")
-    suspend fun searchContacts(query: String, limit: Int, offset: Int): List<Contact>
-
-    @Query("SELECT * FROM contacts LIMIT :limit OFFSET :offset")
-    suspend fun getContacts(limit: Int, offset: Int): List<Contact>
+    @Query("SELECT * FROM contacts WHERE REPLACE(name, ' ', '') LIKE '%' || REPLACE(:query, ' ', '') || '%' OR phoneNumbers LIKE '%' || :query || '%'")
+    suspend fun searchContacts(query: String): List<Contact>
 
     @Query("SELECT * FROM contacts")
      fun getContacts(): Flow<List<Contact>>

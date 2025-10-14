@@ -62,18 +62,6 @@ class ContactsFragment : Fragment() {
         val layoutManager = LinearLayoutManager(requireContext())
         binding.contactsRecyclerView.layoutManager = layoutManager
         binding.contactsRecyclerView.adapter = contactAdapter
-        binding.contactsRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                val visibleItemCount = layoutManager.childCount
-                val totalItemCount = layoutManager.itemCount
-                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-
-                if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
-                    viewModel.loadMoreContacts()
-                }
-            }
-        })
     }
 
     private fun setupSearch() {
