@@ -1,59 +1,61 @@
 package com.bnw.voip.ui.login
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.bnw.voip.databinding.ActivityLoginBinding
+import com.bnw.voip.domain.usecase.call.GetCallStateUseCase
 import com.bnw.voip.ui.main.MainActivity
+import com.bnw.voip.utils.AppConstants
+import com.bnw.voip.voip.CallState
+import com.bnw.voip.voip.Constants
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
+    private val viewModel: LoginViewModel by viewModels()
 
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val allGranted = permissions.entries.all { it.value }
-            if (allGranted) {
-                navigateToMain()
-            } else {
-                // Handle the case where some permissions are not granted
-                // For example, show a dialog or a snackbar
-            }
-        }
+    @Inject
+    lateinit var getCallStateUseCase: GetCallStateUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        checkAndRequestPermissions()
+        binding.passwordEditText.setText(Constants.PASSWORD)
+        binding.usernameEditText.setText(Constants.USERNAME)
         binding.loginButton.setOnClickListener {
+            val username = binding.usernameEditText.text.toString()
+            val password = binding.passwordEditText.text.toString()
+            viewModel.login(username, password)
+        }
 
-        }
-    }
-
-    private fun checkAndRequestPermissions() {
-        val permissionsToRequest = mutableListOf<String>()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            permissionsToRequest.add(Manifest.permission.RECORD_AUDIO)
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            permissionsToRequest.add(Manifest.permission.READ_CONTACTS)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+        lifecycleScope.launch {
+            getCallStateUseCase().collect { state ->
+                when (val registrationState = state.registrationState) {
+                    is CallState.RegistrationState.Progress -> {
+                        // Show progress
+                    }
+                    is CallState.RegistrationState.Ok -> {
+                        navigateToMain()
+                    }
+                    is CallState.RegistrationState.Failed -> {
+                        Toast.makeText(
+                            this@LoginActivity,
+                            "Registration failed: ${registrationState.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> {}
+                }
             }
-        }
-
-        if (permissionsToRequest.isNotEmpty()) {
-            requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
-        } else {
-            navigateToMain()
         }
     }
 

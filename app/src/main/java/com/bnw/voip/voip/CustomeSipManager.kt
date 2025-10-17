@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.bnw.voip.data.datastore.UserManager
 import com.bnw.voip.domain.usecase.AddCallLogUseCase
 import com.bnw.voip.ui.incommingcall.CallingActivity
 import com.bnw.voip.utils.AppConstants
@@ -32,14 +33,15 @@ import javax.inject.Singleton
 class CustomeSipManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val core: Core,
-    private val addCallLogUseCase: AddCallLogUseCase
+    private val addCallLogUseCase: AddCallLogUseCase,
+    private val userManager: UserManager
 ) {
     private val handler = Handler(Looper.getMainLooper())
     private var isStarted = false
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    private val _callState = MutableStateFlow<CallStateEvent?>(null)
-    val callState: StateFlow<CallStateEvent?> = _callState
+    private val _callState = MutableStateFlow(CallState.State(CallState.Idle, CallState.RegistrationState.Idle))
+    val callState: StateFlow<CallState.State> = _callState
 
     private val iterateRunnable = object : Runnable {
         override fun run() {
@@ -61,25 +63,13 @@ class CustomeSipManager @Inject constructor(
                 message: String
             ) {
                 Log.d(AppConstants.TAG_SIP_MANAGER, "Registration state: $state, message: $message")
-                when (state) {
-                    RegistrationState.Ok -> {
-                        Log.i(AppConstants.TAG_SIP_MANAGER, "Registration successful")
-                        onRegistrationSuccess()
-                    }
-                    RegistrationState.Failed -> {
-                        Log.e(AppConstants.TAG_SIP_MANAGER, "Registration failed: $message")
-                        onRegistrationFailed(message)
-                    }
-                    RegistrationState.Progress -> {
-                        Log.d(AppConstants.TAG_SIP_MANAGER, "Registration in progress")
-                    }
-                    RegistrationState.Cleared -> {
-                        Log.d(AppConstants.TAG_SIP_MANAGER, "Registration cleared")
-                    }
-                    else -> {
-                        Log.d(AppConstants.TAG_SIP_MANAGER, "Registration state: $state")
-                    }
+                val registrationState = when (state) {
+                    RegistrationState.Ok -> CallState.RegistrationState.Ok
+                    RegistrationState.Failed -> CallState.RegistrationState.Failed(message)
+                    RegistrationState.Progress -> CallState.RegistrationState.Progress
+                    else -> _callState.value.registrationState
                 }
+                _callState.value = _callState.value.copy(registrationState = registrationState)
             }
 
             override fun onCallStateChanged(
@@ -88,42 +78,16 @@ class CustomeSipManager @Inject constructor(
                 state: Call.State,
                 message: String
             ) {
-                _callState.value = CallStateEvent(state, call)
                 Log.d(AppConstants.TAG_SIP_MANAGER, "Call state changed: $state, message: $message")
-                when (state) {
-                    Call.State.IncomingReceived -> {
-                        Log.i(AppConstants.TAG_SIP_MANAGER, "Incoming call received")
-                        onIncomingCall(call)
-                    }
-                    Call.State.OutgoingInit -> {
-                        Log.i(AppConstants.TAG_SIP_MANAGER, "Outgoing call initiated")
-                    }
-                    Call.State.OutgoingProgress -> {
-                        Log.i(AppConstants.TAG_SIP_MANAGER, "Outgoing call in progress")
-                    }
-                    Call.State.OutgoingRinging -> {
-                        Log.i(AppConstants.TAG_SIP_MANAGER, "Remote ringing")
-                    }
-                    Call.State.Connected -> {
-                        Log.i(AppConstants.TAG_SIP_MANAGER, "Call connected")
-                        onCallConnected(call)
-                    }
-                    Call.State.StreamsRunning -> {
-                        Log.i(AppConstants.TAG_SIP_MANAGER, "Call streams running (audio/video active)")
-                        onCallActive(call)
-                    }
-                    Call.State.Released -> {
-                        Log.i(AppConstants.TAG_SIP_MANAGER, "Call released")
-                        onCallEnded(call)
-                    }
-                    Call.State.Error -> {
-                        Log.e(AppConstants.TAG_SIP_MANAGER, "Call error: $message")
-                        onCallError(call, message)
-                    }
-                    else -> {
-                        Log.d(AppConstants.TAG_SIP_MANAGER, "Call state: $state")
-                    }
+                val callState = when (state) {
+                    Call.State.IncomingReceived -> CallState.Incoming(call)
+                    Call.State.OutgoingInit, Call.State.OutgoingProgress, Call.State.OutgoingRinging -> CallState.Outgoing(call)
+                    Call.State.Connected, Call.State.StreamsRunning -> CallState.Connected(call)
+                    Call.State.Released -> CallState.Released(call)
+                    Call.State.Error -> CallState.Error(call, message)
+                    else -> _callState.value.callState
                 }
+                _callState.value = _callState.value.copy(callState = callState)
             }
 
             override fun onGlobalStateChanged(
@@ -195,15 +159,15 @@ class CustomeSipManager @Inject constructor(
     /**
      * Login/Register with SIP server
      */
-    fun login() {
+    fun login(username: String, password: String) {
         try {
-            Log.d(AppConstants.TAG_SIP_MANAGER, "Attempting login - Username: ${Constants.USERNAME}, Domain: ${Constants.DOMAIN}")
+            Log.d(AppConstants.TAG_SIP_MANAGER, "Attempting login - Username: $username, Domain: ${Constants.DOMAIN}")
 
             // Create authentication info
             val authInfo = Factory.instance().createAuthInfo(
-                Constants.USERNAME,    // username
-                Constants.USERNAME,    // userid
-                Constants.PASSWORD,    // password
+                username,    // username
+                username,    // userid
+                password,    // password
                 null,                  // ha1
                 null,                  // realm (null = any realm)
                 Constants.DOMAIN       // domain
@@ -215,7 +179,7 @@ class CustomeSipManager @Inject constructor(
             val accountParams = core.createAccountParams()
 
             // Set identity address
-            val identity = Factory.instance().createAddress("sip:${Constants.USERNAME}@${Constants.DOMAIN}")
+            val identity = Factory.instance().createAddress("sip:$username@${Constants.DOMAIN}")
             if (identity == null) {
                 Log.e(AppConstants.TAG_SIP_MANAGER, "Failed to create identity address")
                 return
@@ -414,40 +378,6 @@ class CustomeSipManager @Inject constructor(
      */
     fun getCurrentCallState(): Call.State? {
         return core.currentCall?.state
-    }
-
-    // Callback methods - override these in your implementation
-    protected open fun onRegistrationSuccess() {
-        // Override in subclass or use listeners
-    }
-
-    protected open fun onRegistrationFailed(message: String) {
-        // Override in subclass or use listeners
-    }
-
-    protected open fun onIncomingCall(call: Call) {
-//        val intent = Intent(context, CallingActivity::class.java).apply {
-//            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//            putExtra(AppConstants.CALLER_NAME, call.remoteAddress.username)
-//            putExtra(AppConstants.CALL_TYPE, AppConstants.CALL_TYPE_INCOMING)
-//        }
-//        context.startActivity(intent)
-    }
-
-    protected open fun onCallConnected(call: Call) {
-        // Override in subclass or use listeners
-    }
-
-    protected open fun onCallActive(call: Call) {
-        // Override in subclass or use listeners
-    }
-
-    protected open fun onCallEnded(call: Call) {
-        // Override in subclass or use listeners
-    }
-
-    protected open fun onCallError(call: Call, message: String) {
-        // Override in subclass or use listeners
     }
 
     companion object {

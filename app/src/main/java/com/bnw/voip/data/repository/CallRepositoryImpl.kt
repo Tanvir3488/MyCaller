@@ -12,9 +12,9 @@ class CallRepositoryImpl @Inject constructor(
 ) : CallRepository {
     override fun answerCall() = sipManager.answerCall()
     override fun hangupCall() = sipManager.hangup()
-    override fun getCallState(): Flow<com.bnw.voip.voip.CallStateEvent?> = sipManager.callState
+    override fun getCallState(): Flow<com.bnw.voip.voip.CallState.State> = sipManager.callState
     override fun makeCall(number: String) = sipManager.call(number)
-    override fun login() = sipManager.login()
+    override fun login(username: String, password: String) = sipManager.login(username, password)
     override fun start() = sipManager.start()
     override fun stop() = sipManager.stop()
 }

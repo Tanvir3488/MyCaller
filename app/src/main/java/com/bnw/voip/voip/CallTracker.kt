@@ -41,28 +41,28 @@ class CallTracker @Inject constructor(
     fun startTracking() {
         scope.launch {
             getCallStateUseCase().collect { event ->
-                when (event?.state) {
-                    Call.State.OutgoingInit -> {
+                when (val callState = event.callState) {
+                    is CallState.Outgoing -> {
                         currentCallLog = CallLogs(
-                            callerName = event.call?.remoteAddress?.displayName ?: UNKNOWN_CALLER,
-                            phoneNumber = event.call?.remoteAddress?.username ?: "",
+                            callerName = callState.call.remoteAddress?.displayName ?: UNKNOWN_CALLER,
+                            phoneNumber = callState.call.remoteAddress?.username ?: "",
                             callStartTime = System.currentTimeMillis(),
                             callEndTime = 0,
                             callDuration = 0,
                             callType = CALL_TYPE_OUTGOING
                         )
                     }
-                    Call.State.IncomingReceived -> {
+                    is CallState.Incoming -> {
                         currentCallLog = CallLogs(
-                            callerName = event.call?.remoteAddress?.displayName ?: UNKNOWN_CALLER,
-                            phoneNumber = event.call?.remoteAddress?.username ?: "",
+                            callerName = callState.call.remoteAddress?.displayName ?: UNKNOWN_CALLER,
+                            phoneNumber = callState.call.remoteAddress?.username ?: "",
                             callStartTime = System.currentTimeMillis(),
                             callEndTime = 0,
                             callDuration = 0,
                             callType = CALL_TYPE_INCOMING
                         )
                     }
-                    Call.State.Connected -> {
+                    is CallState.Connected -> {
                         isCallConnected = true
                         if (_callConnectedTime.value == null) {
                             _callConnectedTime.value = SystemClock.elapsedRealtime()
@@ -70,7 +70,7 @@ class CallTracker @Inject constructor(
                         }
                         currentCallLog = currentCallLog?.copy(callType = CALL_TYPE_ANSWERED, callStartTime = System.currentTimeMillis())
                     }
-                    Call.State.End -> {
+                    is CallState.Released -> {
                         _callConnectedTime.value = null
                         _callConnectedWallTime.value = null
                         callNotificationManager.dismissNotification()
@@ -93,12 +93,6 @@ class CallTracker @Inject constructor(
                             addCallLogUseCase(it.copy(callEndTime = endTime, callDuration = duration, callType = callType))
                             currentCallLog = null
                         }
-                    }
-
-                    Call.State.Released -> {
-                        _callConnectedTime.value = null
-                        _callConnectedWallTime.value = null
-                        callNotificationManager.dismissNotification()
                     }
                     else -> {
                         // Do nothing

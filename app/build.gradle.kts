@@ -74,4 +74,7 @@ dependencies {
     implementation(libs.logging.interceptor)
 
     implementation(libs.androidx.hilt.navigation.fragment)
+
+    // DataStore
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 }

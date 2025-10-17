@@ -1,14 +1,14 @@
 package com.bnw.voip.data.repository
 
+import com.bnw.voip.voip.CallState
 import kotlinx.coroutines.flow.Flow
-import org.linphone.core.Call
 
 interface CallRepository {
     fun answerCall()
     fun hangupCall()
-    fun getCallState(): Flow<com.bnw.voip.voip.CallStateEvent?>
+    fun getCallState(): Flow<CallState.State>
     fun makeCall(number: String)
-    fun login()
+    fun login(username: String, password: String)
     fun start()
     fun stop()
 }

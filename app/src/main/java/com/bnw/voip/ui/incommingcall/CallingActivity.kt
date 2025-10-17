@@ -10,14 +10,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.bnw.voip.databinding.ActivityIncomingCallBinding
 import com.bnw.voip.utils.AppConstants
+import com.bnw.voip.voip.CallState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import org.linphone.core.Call
 
 @AndroidEntryPoint
 class CallingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityIncomingCallBinding
-    private val viewModel: IncomingCallViewModel by viewModels()
+    private val viewModel: CallViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,25 +73,24 @@ class CallingActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.callState.observe(this) { state ->
-            Log.e("CallingActivity:", "Call $state")
-            when (state?.state) {
-                Call.State.Connected, Call.State.StreamsRunning -> {
-                    viewModel.callConnectedTime.value?.let {
-                        binding.tvTimer.base = it
-                        binding.tvTimer.visibility = View.VISIBLE
-                        binding.tvTimer.start()
-                        viewModel.showOngoingCallNotification()
+        lifecycleScope.launch {
+            viewModel.callState.collect { state ->
+                Log.e("CallingActivity:", "Call $state")
+                when (state.callState) {
+                    is CallState.Connected -> {
+                        viewModel.callConnectedTime.value?.let {
+                            binding.tvTimer.base = it
+                            binding.tvTimer.visibility = View.VISIBLE
+                            binding.tvTimer.start()
+                            viewModel.showOngoingCallNotification()
+                        }
                     }
-                }
-                Call.State.End -> {
-                    finish()
-                }
-                Call.State.Released -> {
-                    finish()
-                }
-                else -> {
-                    // Handle other states if needed
+                    is CallState.Released -> {
+                        finish()
+                    }
+                    else -> {
+                        // Handle other states if needed
+                    }
                 }
             }
         }

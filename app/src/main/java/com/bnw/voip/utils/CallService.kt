@@ -12,32 +12,30 @@ import android.content.Context
 import android.os.VibrationEffect
 import android.os.Vibrator
 import com.bnw.voip.R
+import com.bnw.voip.data.datastore.UserManager
 import com.bnw.voip.domain.usecase.call.GetCallStateUseCase
 import com.bnw.voip.domain.usecase.call.LoginUseCase
 import com.bnw.voip.domain.usecase.call.StartSipUseCase
 import com.bnw.voip.ui.main.MainActivity
+import com.bnw.voip.voip.CallState
 import com.bnw.voip.voip.CallTracker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.linphone.core.Call
 import javax.inject.Inject
-
-/******
-
- **** Created By  TANVIR3488 AT 8/10/25 10:54 PM
-
- ******/
 
 @AndroidEntryPoint
 class CallService : Service() {
 
     @Inject
     lateinit var loginUseCase: LoginUseCase
+
+    @Inject
+    lateinit var userManager: UserManager
 
     @Inject
     lateinit var callTracker: CallTracker
@@ -60,22 +58,28 @@ class CallService : Service() {
         super.onCreate()
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         startForegroundService()
-        loginUseCase()
+        serviceScope.launch {
+            val username = userManager.usernameFlow.first()
+            val password = userManager.passwordFlow.first()
+            if (username != null && password != null) {
+                loginUseCase(username, password)
+            }
+        }
         startSipUseCase()
         callTracker.startTracking()
         serviceScope.launch {
             getCallStateUseCase().collect {
-                android.util.Log.d("CallService", "Call state received: ${it?.state}") // Added log
-                if (it?.state == Call.State.IncomingReceived) {
+                android.util.Log.d("CallService", "Call state received: ${it.callState}") // Added log
+                if (it.callState is CallState.Incoming) {
                     android.util.Log.d("CallService", "Incoming call received, starting vibration") // Added log
-                    callNotificationManager.showIncomingCall(it.call?.remoteAddress?.displayName ?: "Unknown")
+                    callNotificationManager.showIncomingCall((it.callState as CallState.Incoming).call.remoteAddress?.displayName ?: "Unknown")
                     val pattern = longArrayOf(0, 1000, 500) // Vibrate for 1s, pause for 0.5s
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0)) // Repeat from index 0
                     } else {
                         vibrator.vibrate(pattern, 0) // Repeat from index 0
                     }
-                } else if (it?.state == Call.State.End || it?.state == Call.State.Released || it?.state == Call.State.Connected || it?.state == Call.State.StreamsRunning) {
+                } else if (it.callState is CallState.Connected || it.callState is CallState.Released) {
                     android.util.Log.d("CallService", "Call connected, ended or released, stopping vibration") // Added log
                     callNotificationManager.dismissNotification()
                     vibrator.cancel()

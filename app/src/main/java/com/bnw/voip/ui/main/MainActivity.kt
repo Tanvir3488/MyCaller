@@ -11,7 +11,6 @@ import com.bnw.voip.R
 import com.bnw.voip.databinding.ActivityMainBinding
 import com.bnw.voip.domain.usecase.SyncContactsUseCase
 import com.bnw.voip.utils.CallService
-import com.bnw.voip.voip.CustomeSipManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject

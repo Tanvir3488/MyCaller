@@ -3,8 +3,6 @@ package com.bnw.voip.ui.incommingcall
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.bnw.voip.domain.usecase.GetContactByNumberUseCase
 import com.bnw.voip.domain.usecase.call.AnswerCallUseCase
@@ -12,14 +10,15 @@ import com.bnw.voip.domain.usecase.call.GetCallStateUseCase
 import com.bnw.voip.domain.usecase.call.HangupCallUseCase
 import com.bnw.voip.utils.AppConstants
 import com.bnw.voip.utils.CallNotificationManager
-import com.bnw.voip.voip.CallStateEvent
+import com.bnw.voip.voip.CallState
 import com.bnw.voip.voip.CallTracker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.linphone.core.Call
 import javax.inject.Inject
 
 data class CallingUiState(
@@ -28,7 +27,7 @@ data class CallingUiState(
 )
 
 @HiltViewModel
-class IncomingCallViewModel @Inject constructor(
+class CallViewModel @Inject constructor(
     private val answerCallUseCase: AnswerCallUseCase,
     private val hangupCallUseCase: HangupCallUseCase,
     getCallStateUseCase: GetCallStateUseCase,
@@ -38,7 +37,11 @@ class IncomingCallViewModel @Inject constructor(
     private val callTracker: CallTracker
 ) : ViewModel() {
     var isAcceptVisibleForFirstTime = true
-    val callState = getCallStateUseCase().asLiveData()
+    val callState: StateFlow<CallState.State> = getCallStateUseCase().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = CallState.State(CallState.Idle, CallState.RegistrationState.Idle)
+    )
     val callConnectedTime: StateFlow<Long?> = callTracker.callConnectedTime
     val callConnectedWallTime: StateFlow<Long?> = callTracker.callConnectedWallTime
 
@@ -68,7 +71,7 @@ class IncomingCallViewModel @Inject constructor(
             if (caller != null) {
                 _callerNumber.value = caller
                 val contact = getContactByNumberUseCase(caller)
-                Log.e("IncomingCallViewModel", "Fetched contact: $contact for number: $caller")
+                Log.e("CallViewModel", "Fetched contact: $contact for number: $caller")
                 if (contact != null) {
                     _callerName.value = contact.name
                     _photoUri.value = contact.photoUri
@@ -82,14 +85,13 @@ class IncomingCallViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            combine(callState.asFlow(), callType) { state: CallStateEvent?, type: String ->
-
+            combine(callState, callType) { state, type ->
                 val isAcceptVisible =
-                    (type == AppConstants.CALL_TYPE_INCOMING && state?.state == Call.State.IncomingReceived )
-                Log.e("IncomingCallViewModel", " $isAcceptVisible Call State: $type - ${state?.state}")
+                    (type == AppConstants.CALL_TYPE_INCOMING && state.callState is CallState.Incoming)
+                Log.e("CallViewModel", " $isAcceptVisible Call State: $type - ${state.callState}")
                 val declineText =
-                    if ((type == AppConstants.CALL_TYPE_OUTGOING || state?.state != Call.State.IncomingReceived))  "End" else "Decline"
-                if (!isAcceptVisible){
+                    if ((type == AppConstants.CALL_TYPE_OUTGOING || state.callState !is CallState.Incoming)) "End" else "Decline"
+                if (!isAcceptVisible) {
                     isAcceptVisibleForFirstTime = false
                 }
                 CallingUiState(isAcceptVisible, declineText)
