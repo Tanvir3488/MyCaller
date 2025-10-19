@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item
-        android:id="@+id/contactsFragment"
-        android:icon="@drawable/ic_contacts"
-        android:title="Contacts" />
-
     <item
         android:id="@+id/dialerFragment"
         android:icon="@drawable/ic_dialpad"
         android:title="Dialer" />
-
     <item
         android:id="@+id/callHistoryFragment"
         android:icon="@drawable/ic_call_history"
-        android:title="Call History" />
-
+        android:title="History" />
+    <item
+        android:id="@+id/contactsFragment"
+        android:icon="@drawable/ic_contacts"
+        android:title="Contacts" />
+    <item
+        android:id="@+id/profileFragment"
+        android:icon="@drawable/ic_profile"
+        android:title="Profile" />
 </menu>

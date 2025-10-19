@@ -30,4 +30,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindCallLogRepository(impl: CallLogRepositoryImpl): CallLogRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindProfileRepository(impl: com.bnw.voip.data.repository.ProfileRepositoryImpl): com.bnw.voip.data.repository.ProfileRepository
 }

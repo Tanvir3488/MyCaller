@@ -38,4 +38,10 @@ class UserManager @Inject constructor(@ApplicationContext private val context: C
         get() = dataStore.data.map { preferences ->
             preferences[PASSWORD_KEY]
         }
+
+    suspend fun clearUser() {
+        dataStore.edit { preferences ->
+            preferences.clear()
+        }
+    }
 }
