@@ -14,6 +14,7 @@ import com.bnw.voip.utils.AppConstants
 import com.bnw.voip.voip.CallState
 import com.bnw.voip.voip.Constants
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,7 +37,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.callState.collect { state ->
+            viewModel.callState.take(3).collect { state ->
                 when (val registrationState = state.registrationState) {
                     is CallState.RegistrationState.Progress -> {
                         // Show progress
