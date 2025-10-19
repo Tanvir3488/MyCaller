@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.linphone.core.Account
 import org.linphone.core.AudioDevice
 import org.linphone.core.AVPFMode
@@ -41,7 +42,7 @@ class CustomeSipManager @Inject constructor(
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     private val _callState = MutableStateFlow(CallState.State(CallState.Idle, CallState.RegistrationState.Idle))
-    val callState: StateFlow<CallState.State> = _callState
+    val callState: StateFlow<CallState.State> = _callState.asStateFlow()
 
     private val iterateRunnable = object : Runnable {
         override fun run() {
@@ -249,6 +250,7 @@ class CustomeSipManager @Inject constructor(
         }
         core.clearAccounts()
         core.clearAllAuthInfo()
+        resetCallState()
         Log.i(AppConstants.TAG_SIP_MANAGER, "Logged out successfully")
     }
 
@@ -378,6 +380,10 @@ class CustomeSipManager @Inject constructor(
      */
     fun getCurrentCallState(): Call.State? {
         return core.currentCall?.state
+    }
+
+    fun resetCallState() {
+        _callState.value = CallState.State(CallState.Idle, CallState.RegistrationState.Idle)
     }
 
     companion object {

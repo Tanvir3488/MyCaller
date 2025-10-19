@@ -12,9 +12,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.bnw.voip.voip.CustomeSipManager
+
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userManager: UserManager,
+    private val sipManager: CustomeSipManager,
     getUserUseCase: GetUserUseCase
 ) : ViewModel() {
 
@@ -26,6 +29,7 @@ class ProfileViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
+            sipManager.logout()
             userManager.clearUser()
         }
     }

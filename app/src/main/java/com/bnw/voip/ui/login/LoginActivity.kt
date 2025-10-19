@@ -2,6 +2,7 @@ package com.bnw.voip.ui.login
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -22,9 +23,6 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private val viewModel: LoginViewModel by viewModels()
 
-    @Inject
-    lateinit var getCallStateUseCase: GetCallStateUseCase
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
@@ -38,7 +36,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            getCallStateUseCase().collect { state ->
+            viewModel.callState.collect { state ->
                 when (val registrationState = state.registrationState) {
                     is CallState.RegistrationState.Progress -> {
                         // Show progress
@@ -60,6 +58,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun navigateToMain() {
+        Log.e("LoginActivity", "navigateToMain")
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()

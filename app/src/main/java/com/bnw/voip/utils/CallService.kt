@@ -42,8 +42,6 @@ class CallService : Service() {
     @Inject
     lateinit var startSipUseCase: StartSipUseCase
     @Inject
-    lateinit var getCallStateUseCase: GetCallStateUseCase
-    @Inject
     lateinit var callNotificationManager: CallNotificationManager
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -67,25 +65,6 @@ class CallService : Service() {
         }
         startSipUseCase()
         callTracker.startTracking()
-        serviceScope.launch {
-            getCallStateUseCase().collect {
-                android.util.Log.d("CallService", "Call state received: ${it.callState}") // Added log
-                if (it.callState is CallState.Incoming) {
-                    android.util.Log.d("CallService", "Incoming call received, starting vibration") // Added log
-                    callNotificationManager.showIncomingCall((it.callState as CallState.Incoming).call.remoteAddress?.displayName ?: "Unknown")
-                    val pattern = longArrayOf(0, 1000, 500) // Vibrate for 1s, pause for 0.5s
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0)) // Repeat from index 0
-                    } else {
-                        vibrator.vibrate(pattern, 0) // Repeat from index 0
-                    }
-                } else if (it.callState is CallState.Connected || it.callState is CallState.Released) {
-                    android.util.Log.d("CallService", "Call connected, ended or released, stopping vibration") // Added log
-                    callNotificationManager.dismissNotification()
-                    vibrator.cancel()
-                }
-            }
-        }
     }
 
     private fun startForegroundService() {

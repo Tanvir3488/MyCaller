@@ -17,6 +17,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.linphone.core.Call
 import javax.inject.Inject
@@ -38,9 +39,16 @@ class CallTracker @Inject constructor(
     private val _callConnectedWallTime = MutableStateFlow<Long?>(null)
     val callConnectedWallTime: StateFlow<Long?> = _callConnectedWallTime.asStateFlow()
     var isCallConnected : Boolean = false
+
+    val callState: StateFlow<CallState.State> = getCallStateUseCase().stateIn(
+        scope = scope,
+        started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+        initialValue = CallState.State(CallState.Idle, CallState.RegistrationState.Idle)
+    )
+
     fun startTracking() {
         scope.launch {
-            getCallStateUseCase().collect { event ->
+            callState.collect { event ->
                 when (val callState = event.callState) {
                     is CallState.Outgoing -> {
                         currentCallLog = CallLogs(

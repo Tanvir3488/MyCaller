@@ -30,18 +30,13 @@ data class CallingUiState(
 class CallViewModel @Inject constructor(
     private val answerCallUseCase: AnswerCallUseCase,
     private val hangupCallUseCase: HangupCallUseCase,
-    getCallStateUseCase: GetCallStateUseCase,
     private val getContactByNumberUseCase: GetContactByNumberUseCase,
     private val callNotificationManager: CallNotificationManager,
     private val savedStateHandle: SavedStateHandle,
     private val callTracker: CallTracker
 ) : ViewModel() {
     var isAcceptVisibleForFirstTime = true
-    val callState: StateFlow<CallState.State> = getCallStateUseCase().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = CallState.State(CallState.Idle, CallState.RegistrationState.Idle)
-    )
+    val callState: StateFlow<CallState.State> = callTracker.callState
     val callConnectedTime: StateFlow<Long?> = callTracker.callConnectedTime
     val callConnectedWallTime: StateFlow<Long?> = callTracker.callConnectedWallTime
 
