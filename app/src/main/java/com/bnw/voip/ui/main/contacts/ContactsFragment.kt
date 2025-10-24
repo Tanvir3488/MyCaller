@@ -66,11 +66,14 @@ class ContactsFragment : Fragment() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
                     
+                    Log.d("ContactsFragment", "onScrolled called - dx: $dx, dy: $dy")
+                    
                     if (dy > 0) { // Only trigger when scrolling down
                         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
                         val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+                        val totalItemCount = layoutManager.itemCount
                         
-                        Log.d("ContactsFragment", "Scrolled down - lastVisible: $lastVisibleItemPosition, adapter size: ${contactAdapter.itemCount}")
+                        Log.d("ContactsFragment", "Scrolled down - lastVisible: $lastVisibleItemPosition, totalItems: $totalItemCount, adapter size: ${contactAdapter.itemCount}")
                         
                         if (viewModel.shouldLoadMore(lastVisibleItemPosition)) {
                             Log.d("ContactsFragment", "Triggering loadMoreContacts")
@@ -98,7 +101,10 @@ class ContactsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.contacts.collect { contacts ->
-                    contactAdapter.submitList(contacts)
+                    Log.d("ContactsFragment", "Received ${contacts.size} contacts from ViewModel")
+                    contactAdapter.submitList(contacts) {
+                        Log.d("ContactsFragment", "Adapter updated - itemCount: ${contactAdapter.itemCount}")
+                    }
                     updateUIState(contacts, viewModel.isLoading.value, viewModel.isLoadingMore.value)
                 }
             }
@@ -126,18 +132,23 @@ class ContactsFragment : Fragment() {
     }
 
     private fun updateUIState(contacts: List<Contact>, isLoading: Boolean, isLoadingMore: Boolean) {
+        Log.d("ContactsFragment", "updateUIState - contacts: ${contacts.size}, isLoading: $isLoading, isLoadingMore: $isLoadingMore")
+        
         when {
             isLoading && contacts.isEmpty() -> {
+                Log.d("ContactsFragment", "Showing loading state")
                 binding.loadingStateLayout.visibility = View.VISIBLE
                 binding.contactsRecyclerView.visibility = View.GONE
                 binding.emptyStateLayout.visibility = View.GONE
             }
             contacts.isEmpty() && !isLoading -> {
+                Log.d("ContactsFragment", "Showing empty state")
                 binding.loadingStateLayout.visibility = View.GONE
                 binding.contactsRecyclerView.visibility = View.GONE
                 binding.emptyStateLayout.visibility = View.VISIBLE
             }
             else -> {
+                Log.d("ContactsFragment", "Showing contacts list")
                 binding.loadingStateLayout.visibility = View.GONE
                 binding.contactsRecyclerView.visibility = View.VISIBLE
                 binding.emptyStateLayout.visibility = View.GONE

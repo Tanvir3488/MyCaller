@@ -25,56 +25,58 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <LinearLayout
+        <!-- Modern Search Bar -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingTop="16dp">
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="@color/contacts_card_background"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp">
 
-            <!-- Modern Search Bar -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/searchInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/contacts_card_background"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
+                android:layout_margin="8dp"
+                style="@style/Widget.Material3.TextInputLayout.FilledBox"
+                app:boxBackgroundColor="@color/contacts_search_background"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:hintTextColor="@color/contacts_search_hint"
+                app:startIconDrawable="@drawable/ic_search"
+                app:startIconTint="@color/contacts_search_hint"
+                app:endIconMode="clear_text"
+                app:endIconTint="@color/contacts_search_hint">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/searchInputLayout"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/search_edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    style="@style/Widget.Material3.TextInputLayout.FilledBox"
-                    app:boxBackgroundColor="@color/contacts_search_background"
-                    app:boxStrokeWidth="0dp"
-                    app:boxStrokeWidthFocused="0dp"
-                    app:hintTextColor="@color/contacts_search_hint"
-                    app:startIconDrawable="@drawable/ic_search"
-                    app:startIconTint="@color/contacts_search_hint"
-                    app:endIconMode="clear_text"
-                    app:endIconTint="@color/contacts_search_hint">
+                    android:hint="Search contacts"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:textColor="@color/contacts_text_primary"
+                    android:textColorHint="@color/contacts_search_hint"
+                    android:textSize="16sp" />
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/search_edit_text"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Search contacts"
-                        android:inputType="text"
-                        android:maxLines="1"
-                        android:textColor="@color/contacts_text_primary"
-                        android:textColorHint="@color/contacts_search_hint"
-                        android:textSize="16sp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                </com.google.android.material.textfield.TextInputLayout>
+        </androidx.cardview.widget.CardView>
 
-            </androidx.cardview.widget.CardView>
+        <!-- Content Container -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
             <!-- Loading State -->
             <LinearLayout
@@ -82,7 +84,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="80dp"
                 android:orientation="vertical"
                 android:visibility="visible">
 
@@ -112,9 +113,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/contacts_recycler_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:nestedScrollingEnabled="false"
                 android:paddingBottom="16dp"
                 android:visibility="gone"
                 tools:listitem="@layout/item_contact" />
@@ -125,7 +125,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="80dp"
                 android:orientation="vertical"
                 android:visibility="gone"
                 tools:visibility="visible">
@@ -159,8 +158,8 @@
 
             </LinearLayout>
 
-        </LinearLayout>
+        </FrameLayout>
 
-    </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

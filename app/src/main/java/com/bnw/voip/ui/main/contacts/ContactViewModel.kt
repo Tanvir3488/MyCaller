@@ -53,11 +53,11 @@ class ContactViewModel @Inject constructor(
                 currentPage = 0
                 hasMoreItems = true
                 isSearchMode = false
-                
-                Log.d("ContactViewModel", "Loading initial contacts, page: 0, pageSize: $PAGE_SIZE")
+
+                Log.e("ContactViewModel", "Loading initial contacts, page: 0, pageSize: $PAGE_SIZE")
                 val result = getContactsUseCase.getContactsPaginated(page = 0, pageSize = PAGE_SIZE)
-                Log.d("ContactViewModel", "Initial load result: ${result.contacts.size} contacts, hasMore: ${result.hasMoreItems}, total: ${result.totalCount}")
-                
+                Log.e("ContactViewModel", "Initial load result: ${result.contacts.size} contacts, hasMore: ${result.hasMoreItems}, total: ${result.totalCount}")
+
                 _contacts.value = result.contacts
                 hasMoreItems = result.hasMoreItems
                 currentPage = 1
@@ -71,36 +71,36 @@ class ContactViewModel @Inject constructor(
 
     fun searchContacts(query: String) {
         _searchQuery.value = query
-        
+
         // Cancel previous search job
         searchJob?.cancel()
-        
+
         if (query.isBlank()) {
             if (isSearchMode) {
-                Log.d("ContactViewModel", "Search cleared, loading initial contacts")
+                Log.e("ContactViewModel", "Search cleared, loading initial contacts")
                 loadInitialContacts()
             }
             return
         }
 
         if (query == lastSearchQuery) return
-        
+
         // Debounce search
         searchJob = viewModelScope.launch {
             delay(300) // 300ms debounce
-            
+
             lastSearchQuery = query
             isSearchMode = true
-            
+
             _isLoading.value = true
             try {
                 currentPage = 0
                 hasMoreItems = true
-                
-                Log.d("ContactViewModel", "Searching for: '$query', page: 0")
+
+                Log.e("ContactViewModel", "Searching for: '$query', page: 0")
                 val result = getContactsUseCase.searchContactsPaginated(query, page = 0, pageSize = PAGE_SIZE)
-                Log.d("ContactViewModel", "Search result: ${result.contacts.size} contacts, hasMore: ${result.hasMoreItems}, total: ${result.totalCount}")
-                
+                Log.e("ContactViewModel", "Search result: ${result.contacts.size} contacts, hasMore: ${result.hasMoreItems}, total: ${result.totalCount}")
+
                 _contacts.value = result.contacts
                 hasMoreItems = result.hasMoreItems
                 currentPage = 1
@@ -113,32 +113,32 @@ class ContactViewModel @Inject constructor(
     }
 
     fun loadMoreContacts() {
-        Log.d("ContactViewModel", "loadMoreContacts called - hasMoreItems: $hasMoreItems, isLoading: ${_isLoading.value}, isLoadingMore: ${_isLoadingMore.value}")
-        
+        Log.e("ContactViewModel", "loadMoreContacts called - hasMoreItems: $hasMoreItems, isLoading: ${_isLoading.value}, isLoadingMore: ${_isLoadingMore.value}")
+
         if (!hasMoreItems || _isLoading.value || _isLoadingMore.value) {
-            Log.d("ContactViewModel", "loadMoreContacts blocked - hasMoreItems: $hasMoreItems, isLoading: ${_isLoading.value}, isLoadingMore: ${_isLoadingMore.value}")
+            Log.e("ContactViewModel", "loadMoreContacts blocked - hasMoreItems: $hasMoreItems, isLoading: ${_isLoading.value}, isLoadingMore: ${_isLoadingMore.value}")
             return
         }
-        
+
         viewModelScope.launch {
             _isLoadingMore.value = true
             try {
-                Log.d("ContactViewModel", "Loading more contacts, page: $currentPage, isSearchMode: $isSearchMode")
-                
+                Log.e("ContactViewModel", "Loading more contacts, page: $currentPage, isSearchMode: $isSearchMode")
+
                 val result = if (isSearchMode) {
                     getContactsUseCase.searchContactsPaginated(lastSearchQuery, page = currentPage, pageSize = PAGE_SIZE)
                 } else {
                     getContactsUseCase.getContactsPaginated(page = currentPage, pageSize = PAGE_SIZE)
                 }
-                
-                Log.d("ContactViewModel", "Load more result: ${result.contacts.size} new contacts, hasMore: ${result.hasMoreItems}")
-                
+
+                Log.e("ContactViewModel", "Load more result: ${result.contacts.size} new contacts, hasMore: ${result.hasMoreItems}")
+
                 val currentContacts = _contacts.value.toMutableList()
                 currentContacts.addAll(result.contacts)
                 _contacts.value = currentContacts
-                
-                Log.d("ContactViewModel", "Total contacts after load more: ${currentContacts.size}")
-                
+
+                Log.e("ContactViewModel", "Total contacts after load more: ${currentContacts.size}")
+
                 hasMoreItems = result.hasMoreItems
                 currentPage++
             } catch (e: Exception) {
@@ -153,7 +153,7 @@ class ContactViewModel @Inject constructor(
         val totalItems = _contacts.value.size
         val remainingItems = totalItems - lastVisibleItemPosition - 1 // -1 because position is 0-based
         val shouldLoad = hasMoreItems && remainingItems <= PREFETCH_THRESHOLD
-        Log.d("ContactViewModel", "shouldLoadMore: lastVisible=$lastVisibleItemPosition, totalItems=$totalItems, remaining=$remainingItems, threshold=$PREFETCH_THRESHOLD, hasMore=$hasMoreItems, shouldLoad=$shouldLoad")
+        Log.e("ContactViewModel", "shouldLoadMore: lastVisible=$lastVisibleItemPosition, totalItems=$totalItems, remaining=$remainingItems, threshold=$PREFETCH_THRESHOLD, hasMore=$hasMoreItems, shouldLoad=$shouldLoad")
         return shouldLoad
     }
 }

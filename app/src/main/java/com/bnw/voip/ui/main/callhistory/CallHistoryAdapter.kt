@@ -46,10 +46,10 @@ class CallHistoryAdapter(
         private fun setupCallerInfo(item: CallLogItem) {
             // Set caller name or phone number if no contact name
             binding.callerName.text = item.contactName ?: formatPhoneNumber(item.callLog.phoneNumber)
-            
+
             // Always show the raw phone number in smaller text
             binding.phoneNumber.text = item.callLog.phoneNumber
-            
+
             // Hide phone number row if it's the same as caller name (when no contact name)
             if (item.contactName == null) {
                 binding.phoneNumber.visibility = View.GONE
@@ -76,7 +76,7 @@ class CallHistoryAdapter(
 
         private fun setupCallTypeIndicator(item: CallLogItem) {
             val context = binding.root.context
-            
+
             when (item.callLog.callType) {
                 CALL_TYPE_INCOMING -> {
                     binding.callTypeIconContainer.setCardBackgroundColor(
@@ -112,7 +112,7 @@ class CallHistoryAdapter(
                     binding.callTypeIconContainer.setCardBackgroundColor(
                         ContextCompat.getColor(context, R.color.call_missed)
                     )
-                    binding.callTypeIcon.setImageResource(R.drawable.ic_call_missed)
+                    binding.callTypeIcon.setImageResource(R.drawable.miss_call)
                     binding.callType.text = "MISSED"
                     binding.callTypeBadge.setCardBackgroundColor(
                         ContextCompat.getColor(context, R.color.call_missed)
