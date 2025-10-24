@@ -18,7 +18,11 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "BASE_URL", "\"https://api.restful-api.dev/\"")
-
+        
+        // Add 16KB page size support
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+        }
     }
 
     buildTypes {
@@ -28,6 +32,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            isMinifyEnabled = false
         }
     }
     compileOptions {
@@ -42,6 +49,46 @@ android {
         dataBinding = true
         viewBinding = true
     }
+    
+    packaging {
+        // Handle native libraries for 16KB page size compatibility
+        jniLibs {
+            useLegacyPackaging = true
+            // Include specific libraries with alignment fixes
+            pickFirsts += setOf(
+                "**/libc++_shared.so",
+                "**/liblinphone.so", 
+                "**/libbctoolbox.so",
+                "**/libbctoolbox-tester.so",
+                "**/libZXing.so",
+                "**/libjsoncpp.so",
+                "**/liblinphonetester.so",
+                "**/libmediastreamer.so",
+                "**/libmsaaudio.so",
+                "**/libmsandroidcamera2.so",
+                "**/libmswebrtc.so",
+                "**/libortp.so",
+                "**/libsrtp2.so"
+            )
+        }
+        
+        // Exclude duplicate native libraries
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/versions/9/previous-compilation-data.bin"
+        }
+    }
+    
+    // Add splits configuration for better APK compatibility
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+            isUniversalApk = true
+        }
+    }
+    
 }
 
 dependencies {

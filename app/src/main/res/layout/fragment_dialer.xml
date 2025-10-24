@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <variable
@@ -8,133 +9,273 @@
             type="com.bnw.voip.ui.main.dialer.DialerViewModel" />
     </data>
 
-    <LinearLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:background="@android:color/white">
+        android:background="@color/dialer_background"
+        android:fitsSystemWindows="true">
 
-    <!-- Top Bar -->
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:padding="12dp">
-
-        <TextView
-            android:id="@+id/titleDialpad"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Dialpad"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_centerInParent="true"
-            android:textColor="@android:color/black" />
-
-        <TextView
-            android:id="@+id/balanceText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:text="৳ 0.00"
-            android:textSize="16sp"
-            android:textColor="@android:color/black" />
-    </RelativeLayout>
-
-    <!-- Entered Number Row -->
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="12dp">
-
-        <TextView
-            android:id="@+id/phoneNumber"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:layout_centerInParent="true" />
-
-        <ImageView
-            android:id="@+id/btnDelete"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_backspace"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true" />
-    </RelativeLayout>
-
-    <!-- Dialpad -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center">
-
-        <!-- Row 1 -->
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
-            <TextView android:id="@+id/button1" style="@style/DialKey" android:text="1" />
-            <TextView android:id="@+id/button2" style="@style/DialKey" android:text="2\nABC" />
-            <TextView android:id="@+id/button3" style="@style/DialKey" android:text="3\nDEF" />
-        </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="32dp">
 
-        <!-- Row 2 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
+                <!-- Modern Header -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="24dp"
+                    app:cardBackgroundColor="@color/dialer_card_background"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp">
 
-            <TextView android:id="@+id/button4" style="@style/DialKey" android:text="4\nGHI" />
-            <TextView android:id="@+id/button5" style="@style/DialKey" android:text="5\nJKL" />
-            <TextView android:id="@+id/button6" style="@style/DialKey" android:text="6\nMNO" />
-        </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
 
-        <!-- Row 3 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
+                        <!-- Header Row -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
-            <TextView android:id="@+id/button7" style="@style/DialKey" android:text="7\nPQRS" />
-            <TextView android:id="@+id/button8" style="@style/DialKey" android:text="8\nTUV" />
-            <TextView android:id="@+id/button9" style="@style/DialKey" android:text="9\nWXYZ" />
-        </LinearLayout>
+                            <TextView
+                                android:id="@+id/titleDialpad"
+                                style="@style/ModernDialerTitle"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Dialpad" />
 
-        <!-- Row 4 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
+                            <androidx.cardview.widget.CardView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:cardBackgroundColor="@color/accent_blue"
+                                app:cardCornerRadius="20dp"
+                                app:cardElevation="0dp">
 
-            <TextView android:id="@+id/buttonStar" style="@style/DialKey" android:text="*" />
-            <TextView android:id="@+id/button0" style="@style/DialKey" android:text="0\n+" />
-            <TextView android:id="@+id/buttonHash" style="@style/DialKey" android:text="#" />
-        </LinearLayout>
-    </LinearLayout>
+                                <TextView
+                                    android:id="@+id/balanceText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:paddingHorizontal="12dp"
+                                    android:paddingVertical="6dp"
+                                    android:text="৳ 0.00"
+                                    android:textColor="@color/white"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
 
-    <!-- Call Button -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="12dp">
+                            </androidx.cardview.widget.CardView>
 
-        <ImageButton
-            android:id="@+id/btnCall"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="@drawable/bg_circle_green"
-            android:src="@drawable/ic_call"
-            android:scaleType="centerInside"
-            app:tint="@android:color/white" />
-    </LinearLayout>
+                        </LinearLayout>
 
-</LinearLayout>
+                        <!-- Phone Number Display -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp"
+                            android:gravity="center_vertical"
+                            android:minHeight="60dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/phoneNumber"
+                                style="@style/ModernDialerPhoneNumber"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:hint="Enter phone number"
+                                android:textColorHint="@color/text_secondary"
+                                tools:text="+1 234 567 8900" />
+
+                            <androidx.cardview.widget.CardView
+                                android:id="@+id/btnDelete"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:layout_marginStart="12dp"
+                                app:cardBackgroundColor="@android:color/transparent"
+                                app:cardCornerRadius="24dp"
+                                app:cardElevation="0dp">
+
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:layout_gravity="center"
+                                    android:background="@drawable/modern_delete_button_background"
+                                    android:src="@drawable/ic_backspace"
+                                    app:tint="@color/dialer_delete_button" />
+
+                            </androidx.cardview.widget.CardView>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <!-- Modern Dialpad -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="24dp"
+                    app:cardBackgroundColor="@color/dialer_card_background"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="4dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="24dp">
+
+                        <!-- Row 1 -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/button1"
+                                style="@style/ModernDialKey"
+                                android:text="1" />
+
+                            <TextView
+                                android:id="@+id/button2"
+                                style="@style/ModernDialKey"
+                                android:text="2\nABC"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:id="@+id/button3"
+                                style="@style/ModernDialKey"
+                                android:text="3\nDEF"
+                                android:textSize="16sp" />
+                        </LinearLayout>
+
+                        <!-- Row 2 -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/button4"
+                                style="@style/ModernDialKey"
+                                android:text="4\nGHI"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:id="@+id/button5"
+                                style="@style/ModernDialKey"
+                                android:text="5\nJKL"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:id="@+id/button6"
+                                style="@style/ModernDialKey"
+                                android:text="6\nMNO"
+                                android:textSize="16sp" />
+                        </LinearLayout>
+
+                        <!-- Row 3 -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/button7"
+                                style="@style/ModernDialKey"
+                                android:text="7\nPQRS"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:id="@+id/button8"
+                                style="@style/ModernDialKey"
+                                android:text="8\nTUV"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:id="@+id/button9"
+                                style="@style/ModernDialKey"
+                                android:text="9\nWXYZ"
+                                android:textSize="16sp" />
+                        </LinearLayout>
+
+                        <!-- Row 4 -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/buttonStar"
+                                style="@style/ModernDialKey"
+                                android:text="*"
+                                android:textSize="24sp" />
+
+                            <TextView
+                                android:id="@+id/button0"
+                                style="@style/ModernDialKey"
+                                android:text="0\n+"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:id="@+id/buttonHash"
+                                style="@style/ModernDialKey"
+                                android:text="#"
+                                android:textSize="24sp" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <!-- Modern Call Button -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingHorizontal="16dp">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardCornerRadius="36dp"
+                        app:cardElevation="8dp">
+
+                        <ImageButton
+                            android:id="@+id/btnCall"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/modern_call_button_background"
+                            android:contentDescription="Make Call"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_call"
+                            app:tint="@color/white" />
+
+                    </androidx.cardview.widget.CardView>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 </layout>

@@ -26,15 +26,20 @@ class ContactViewModel @Inject constructor(
     private val _contacts = MutableStateFlow<List<Contact>>(emptyList())
     val contacts: StateFlow<List<Contact>> = _contacts.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     init {
         @OptIn(ExperimentalCoroutinesApi::class)
         _searchQuery
             .debounce(300)
             .flatMapLatest { query ->
+                _isLoading.value = true
                 getContactsUseCase(query)
             }
             .onEach { newContacts ->
                 _contacts.value = newContacts
+                _isLoading.value = false
             }
             .launchIn(viewModelScope)
     }

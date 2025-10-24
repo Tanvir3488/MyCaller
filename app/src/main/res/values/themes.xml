@@ -27,6 +27,45 @@
         <item name="android:textColor">@android:color/black</item>
     </style>
 
+    <!-- Bottom Navigation Text Styles -->
+    <style name="BottomNavTextActive" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/bottom_nav_selected</item>
+    </style>
 
+    <style name="BottomNavTextInactive" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/bottom_nav_unselected</item>
+    </style>
+
+    <!-- Modern Dialer Styles -->
+    <style name="ModernDialKey">
+        <item name="android:layout_width">64dp</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:layout_margin">12dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/modern_dial_key_background</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/dialer_key_text_primary</item>
+        <item name="android:lineSpacingExtra">-4dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="ModernDialerTitle" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="ModernDialerPhoneNumber" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">28sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">monospace</item>
+    </style>
 
 </resources>

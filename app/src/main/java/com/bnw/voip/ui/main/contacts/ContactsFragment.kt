@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bnw.voip.data.entity.Contact
 import com.bnw.voip.databinding.FragmentContactsBinding
 import com.bnw.voip.voip.CustomeSipManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,23 +46,27 @@ class ContactsFragment : Fragment() {
 
         setupRecyclerView()
         setupSearch()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.contacts.collect {
-                    contactAdapter.submitList(it)
-                }
-            }
-        }
+        observeContacts()
+        observeLoadingState()
     }
 
     private fun setupRecyclerView() {
         contactAdapter = ContactAdapter { phoneNumber ->
             sipManager.call(phoneNumber)
         }
-        val layoutManager = LinearLayoutManager(requireContext())
-        binding.contactsRecyclerView.layoutManager = layoutManager
-        binding.contactsRecyclerView.adapter = contactAdapter
+        
+        binding.contactsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = contactAdapter
+            
+            // Add scroll listener for better performance
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    // Could add effects here like hiding search bar on scroll
+                }
+            })
+        }
     }
 
     private fun setupSearch() {
@@ -74,6 +79,47 @@ class ContactsFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {}
         })
+    }
+
+    private fun observeContacts() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.contacts.collect { contacts ->
+                    contactAdapter.submitList(contacts)
+                    updateUIState(contacts, viewModel.isLoading.value)
+                }
+            }
+        }
+    }
+
+    private fun observeLoadingState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isLoading.collect { isLoading ->
+                    updateUIState(viewModel.contacts.value, isLoading)
+                }
+            }
+        }
+    }
+
+    private fun updateUIState(contacts: List<Contact>, isLoading: Boolean) {
+        when {
+            isLoading -> {
+                binding.loadingStateLayout.visibility = View.VISIBLE
+                binding.contactsRecyclerView.visibility = View.GONE
+                binding.emptyStateLayout.visibility = View.GONE
+            }
+            contacts.isEmpty() -> {
+                binding.loadingStateLayout.visibility = View.GONE
+                binding.contactsRecyclerView.visibility = View.GONE
+                binding.emptyStateLayout.visibility = View.VISIBLE
+            }
+            else -> {
+                binding.loadingStateLayout.visibility = View.GONE
+                binding.contactsRecyclerView.visibility = View.VISIBLE
+                binding.emptyStateLayout.visibility = View.GONE
+            }
+        }
     }
 
     override fun onDestroyView() {

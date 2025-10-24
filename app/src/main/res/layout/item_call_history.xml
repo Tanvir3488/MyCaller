@@ -7,84 +7,182 @@
 
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="4dp"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardBackgroundColor="@color/call_history_card_background"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp">
 
-        <ImageView
-            android:id="@+id/callTypeIcon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_call"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-        <TextView
-            android:id="@+id/callerName"
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Caller Name"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/callTypeIcon"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/callAgainButton"/>
+            android:padding="16dp">
 
-        <TextView
-            android:id="@+id/phoneNumber"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="123-456-7890"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            app:layout_constraintStart_toEndOf="@id/callTypeIcon"
-            app:layout_constraintTop_toBottomOf="@+id/callerName"
-            app:layout_constraintEnd_toStartOf="@id/callAgainButton"/>
+            <!-- Call Type Icon with Background -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/callTypeIconContainer"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:cardBackgroundColor="@color/call_incoming"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/callDateTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="10:00 AM"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            app:layout_constraintStart_toEndOf="@id/callTypeIcon"
-            app:layout_constraintTop_toBottomOf="@+id/phoneNumber"/>
+                <ImageView
+                    android:id="@+id/callTypeIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_call_incoming"
+                    app:tint="@color/white"
+                    tools:src="@drawable/ic_call_incoming" />
 
-        <TextView
-            android:id="@+id/callDuration"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2 min"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            app:layout_constraintStart_toEndOf="@+id/callDateTime"
-            app:layout_constraintTop_toBottomOf="@+id/phoneNumber"
-            android:layout_marginStart="8dp"/>
+            </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:id="@+id/callType"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text=""
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            app:layout_constraintEnd_toStartOf="@+id/callAgainButton"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/callDuration"
-            app:layout_constraintTop_toTopOf="@+id/callDuration" />
+            <!-- Main Content Area -->
+            <LinearLayout
+                android:id="@+id/contentLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="8dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toStartOf="@id/actionLayout"
+                app:layout_constraintStart_toEndOf="@id/callTypeIconContainer"
+                app:layout_constraintTop_toTopOf="@id/callTypeIconContainer">
 
-        <ImageButton
-            android:id="@+id/callAgainButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_call"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+                <!-- Caller Name -->
+                <TextView
+                    android:id="@+id/callerName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Caller Name"
+                    android:textColor="@color/call_history_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    tools:text="John Doe" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <!-- Phone Number -->
+                <TextView
+                    android:id="@+id/phoneNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:fontFamily="monospace"
+                    android:maxLines="1"
+                    android:text="123-456-7890"
+                    android:textColor="@color/call_history_text_secondary"
+                    android:textSize="14sp"
+                    tools:text="+1 234 567 8900" />
+
+                <!-- Call Details Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <!-- Call Type Badge -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/callTypeBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        app:cardBackgroundColor="@color/call_incoming"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp">
+
+                        <TextView
+                            android:id="@+id/callType"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="2dp"
+                            android:text="INCOMING"
+                            android:textColor="@color/white"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            tools:text="INCOMING" />
+
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Call Duration -->
+                    <TextView
+                        android:id="@+id/callDuration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="8dp"
+                        android:drawablePadding="4dp"
+                        android:text="2:30 min"
+                        android:textColor="@color/call_history_text_secondary"
+                        android:textSize="12sp"
+                        app:drawableStartCompat="@drawable/ic_access_time"
+                        app:drawableTint="@color/call_history_text_secondary"
+                        tools:text="2:30 min" />
+
+                    <!-- Spacer -->
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+
+                    <!-- Call Date/Time -->
+                    <TextView
+                        android:id="@+id/callDateTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:text="10:00 AM"
+                        android:textColor="@color/call_history_text_secondary"
+                        android:textSize="12sp"
+                        tools:text="Today 10:30 AM" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Action Buttons -->
+            <LinearLayout
+                android:id="@+id/actionLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="@id/callTypeIconContainer"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/callTypeIconContainer">
+
+                <!-- Call Again Button -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    app:cardBackgroundColor="@color/dialer_call_button"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="2dp">
+
+                    <ImageButton
+                        android:id="@+id/callAgainButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/modern_call_button_background"
+                        android:contentDescription="Call again"
+                        android:src="@drawable/ic_call"
+                        app:tint="@color/white" />
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
 </layout>

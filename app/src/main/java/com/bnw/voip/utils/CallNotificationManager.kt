@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -54,6 +55,7 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
     }
 
     fun showIncomingCall(phoneNumber: String) {
+        Log.e("CallNotificationManager", "Showing incoming call notification for $phoneNumber")
         // Check notification permission first (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(

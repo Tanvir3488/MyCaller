@@ -1,13 +1,20 @@
 package com.bnw.voip.ui.incommingcall
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
+import coil.load
+import coil.transform.CircleCropTransformation
+import com.bnw.voip.R
 import com.bnw.voip.databinding.ActivityIncomingCallBinding
 import com.bnw.voip.utils.AppConstants
 import com.bnw.voip.voip.CallState
@@ -21,8 +28,22 @@ class CallingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Enable edge-to-edge and secure window
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        )
+        
         binding = ActivityIncomingCallBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        
+        setupAnimations()
         Log.e("CallingActivity:", "onCreate ${intent?.action}")
         when (intent?.action) {
             AppConstants.ACTION_ANSWER_CALL -> {
@@ -35,11 +56,13 @@ class CallingActivity : AppCompatActivity() {
 
         binding.btnAccept.setOnClickListener {
             Log.e("CallingActivity:", "Answer Call Clicked")
+            animateButtonPress(it)
             viewModel.answerCall()
         }
 
         binding.btnDecline.setOnClickListener {
             Log.e("CallingActivity:", "Hung up Call Clicked")
+            animateButtonPress(it)
             viewModel.hangupCall()
         }
 
@@ -58,9 +81,17 @@ class CallingActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.photoUri.collect { photoUri ->
                 if (photoUri != null) {
-                    binding.ivAvatar.setImageURI(android.net.Uri.parse(photoUri))
+                    binding.ivAvatar.load(photoUri) {
+                        crossfade(true)
+                        placeholder(R.drawable.ic_profile)
+                        error(R.drawable.ic_profile)
+                        transformations(CircleCropTransformation())
+                    }
                 } else {
-                    binding.ivAvatar.setImageResource(com.bnw.voip.R.drawable.ic_launcher_foreground) // Or a placeholder
+                    binding.ivAvatar.load(R.drawable.ic_profile) {
+                        crossfade(true)
+                        transformations(CircleCropTransformation())
+                    }
                 }
             }
         }
@@ -80,8 +111,9 @@ class CallingActivity : AppCompatActivity() {
                     is CallState.Connected -> {
                         viewModel.callConnectedTime.value?.let {
                             binding.tvTimer.base = it
-                            binding.tvTimer.visibility = View.VISIBLE
+                            binding.timerCard.visibility = View.VISIBLE
                             binding.tvTimer.start()
+                            binding.tvCallStatus.text = "Connected"
                             viewModel.showOngoingCallNotification()
                         }
                     }
@@ -99,8 +131,9 @@ class CallingActivity : AppCompatActivity() {
             viewModel.callConnectedTime.collect { time ->
                 if (time != null) {
                     binding.tvTimer.base = time
-                    binding.tvTimer.visibility = View.VISIBLE
+                    binding.timerCard.visibility = View.VISIBLE
                     binding.tvTimer.start()
+                    binding.tvCallStatus.text = "Connected"
                 }
             }
         }
@@ -121,6 +154,53 @@ class CallingActivity : AppCompatActivity() {
 
 
 
+    private fun setupAnimations() {
+        // Animate avatar entrance
+        binding.avatarCard.alpha = 0f
+        binding.avatarCard.scaleX = 0.5f
+        binding.avatarCard.scaleY = 0.5f
+        
+        binding.avatarCard.animate()
+            .alpha(1f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(600)
+            .start()
+        
+        // Animate call info card entrance
+        binding.callInfoCard.alpha = 0f
+        binding.callInfoCard.translationY = 50f
+        
+        binding.callInfoCard.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(400)
+            .setStartDelay(200)
+            .start()
+        
+        // Animate action buttons entrance
+        binding.actionButtonsLayout.alpha = 0f
+        binding.actionButtonsLayout.translationY = 100f
+        
+        binding.actionButtonsLayout.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(400)
+            .setStartDelay(400)
+            .start()
+    }
+    
+    private fun animateButtonPress(view: View) {
+        val scaleAnimation = AnimatorSet().apply {
+            playTogether(
+                ObjectAnimator.ofFloat(view, "scaleX", 1f, 0.9f, 1f),
+                ObjectAnimator.ofFloat(view, "scaleY", 1f, 0.9f, 1f)
+            )
+            duration = 150
+        }
+        scaleAnimation.start()
+    }
+    
     override fun onDestroy() {
         super.onDestroy()
     }

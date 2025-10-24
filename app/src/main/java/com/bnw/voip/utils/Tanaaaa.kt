@@ -438,6 +438,6 @@ class Tanaaaa(private val context: Context) {
     }
 
     companion object {
-        private const val TAG = "SipManager"
+        private const val TAG = "TSipManager"
     }
 }

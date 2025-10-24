@@ -3,4 +3,92 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00FFFFFF</color>
+    
+    <!-- Modern Login Colors -->
+    <color name="primary_blue">#2196F3</color>
+    <color name="primary_blue_dark">#1976D2</color>
+    <color name="accent_blue">#03DAC6</color>
+    <color name="background_light">#F8F9FA</color>
+    <color name="surface_white">#FFFFFF</color>
+    <color name="text_primary">#1F2937</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="input_border">#E5E7EB</color>
+    <color name="input_border_focused">#2196F3</color>
+    <color name="error_red">#EF4444</color>
+    
+    <!-- Bottom Navigation Colors -->
+    <color name="bottom_nav_background">#FFFFFF</color>
+    <color name="bottom_nav_selected">#2196F3</color>
+    <color name="bottom_nav_unselected">#9E9E9E</color>
+    <color name="bottom_nav_ripple">#E3F2FD</color>
+    
+    <!-- Dialer Colors -->
+    <color name="dialer_background">#F8FAFC</color>
+    <color name="dialer_card_background">#FFFFFF</color>
+    <color name="dialer_key_background">#FFFFFF</color>
+    <color name="dialer_key_pressed">#F1F5F9</color>
+    <color name="dialer_key_text_primary">#1E293B</color>
+    <color name="dialer_key_text_secondary">#64748B</color>
+    <color name="dialer_display_background">#FFFFFF</color>
+    <color name="dialer_call_button">#10B981</color>
+    <color name="dialer_call_button_pressed">#059669</color>
+    <color name="dialer_delete_button">#EF4444</color>
+    
+    <!-- Call History Colors -->
+    <color name="call_history_background">#F8FAFC</color>
+    <color name="call_history_card_background">#FFFFFF</color>
+    <color name="call_incoming">#10B981</color>
+    <color name="call_outgoing">#3B82F6</color>
+    <color name="call_missed">#EF4444</color>
+    <color name="call_answered">#8B5CF6</color>
+    <color name="call_history_text_primary">#1F2937</color>
+    <color name="call_history_text_secondary">#6B7280</color>
+    <color name="call_history_divider">#E5E7EB</color>
+    <color name="call_history_ripple">#F1F5F9</color>
+    
+    <!-- Contacts Colors -->
+    <color name="contacts_background">#F8FAFC</color>
+    <color name="contacts_card_background">#FFFFFF</color>
+    <color name="contacts_text_primary">#1F2937</color>
+    <color name="contacts_text_secondary">#6B7280</color>
+    <color name="contacts_search_background">#F1F5F9</color>
+    <color name="contacts_search_hint">#9CA3AF</color>
+    <color name="contacts_avatar_1">#EF4444</color>
+    <color name="contacts_avatar_2">#F97316</color>
+    <color name="contacts_avatar_3">#F59E0B</color>
+    <color name="contacts_avatar_4">#10B981</color>
+    <color name="contacts_avatar_5">#3B82F6</color>
+    <color name="contacts_avatar_6">#8B5CF6</color>
+    <color name="contacts_avatar_7">#EC4899</color>
+    <color name="contacts_divider">#F3F4F6</color>
+    
+    <!-- Profile Colors -->
+    <color name="profile_background">#F8FAFC</color>
+    <color name="profile_card_background">#FFFFFF</color>
+    <color name="profile_header_gradient_start">#667EEA</color>
+    <color name="profile_header_gradient_end">#764BA2</color>
+    <color name="profile_text_primary">#1F2937</color>
+    <color name="profile_text_secondary">#6B7280</color>
+    <color name="profile_divider">#E5E7EB</color>
+    <color name="profile_item_background">#FFFFFF</color>
+    <color name="profile_logout_button">#DC2626</color>
+    <color name="profile_logout_button_pressed">#B91C1C</color>
+    <color name="profile_success">#10B981</color>
+    <color name="profile_warning">#F59E0B</color>
+    
+    <!-- Calling Screen Colors -->
+    <color name="calling_background_start">#1A1B23</color>
+    <color name="calling_background_end">#2D2E3A</color>
+    <color name="calling_overlay">#80000000</color>
+    <color name="calling_text_primary">#FFFFFF</color>
+    <color name="calling_text_secondary">#B0BEC5</color>
+    <color name="calling_accept_button">#4CAF50</color>
+    <color name="calling_accept_button_pressed">#45A049</color>
+    <color name="calling_decline_button">#F44336</color>
+    <color name="calling_decline_button_pressed">#D32F2F</color>
+    <color name="calling_timer_background">#212121</color>
+    <color name="calling_avatar_background">#424242</color>
+    <color name="calling_button_ripple">#40FFFFFF</color>
+    <color name="calling_surface">#2A2D3A</color>
+    <color name="calling_surface_variant">#4A4E5B</color>
 </resources>
