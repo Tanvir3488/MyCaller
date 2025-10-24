@@ -2,6 +2,7 @@ package com.bnw.voip.domain.usecase
 
 import com.bnw.voip.data.entity.Contact
 import com.bnw.voip.data.repository.ContactRepository
+import com.bnw.voip.data.repository.PaginationResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -17,5 +18,13 @@ class GetContactsUseCase @Inject constructor(
                 emit(contactRepository.searchContacts(query))
             }
         }
+    }
+
+    suspend fun getContactsPaginated(page: Int, pageSize: Int = 30): PaginationResult {
+        return contactRepository.getContactsPaginated(page, pageSize)
+    }
+
+    suspend fun searchContactsPaginated(query: String, page: Int, pageSize: Int = 30): PaginationResult {
+        return contactRepository.searchContactsPaginated(query, page, pageSize)
     }
 }

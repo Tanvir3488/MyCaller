@@ -3,6 +3,7 @@ package com.bnw.voip.ui.main.contacts
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -48,6 +49,7 @@ class ContactsFragment : Fragment() {
         setupSearch()
         observeContacts()
         observeLoadingState()
+        observeLoadingMoreState()
     }
 
     private fun setupRecyclerView() {
@@ -59,11 +61,22 @@ class ContactsFragment : Fragment() {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = contactAdapter
             
-            // Add scroll listener for better performance
+            // Add scroll listener for pagination
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
-                    // Could add effects here like hiding search bar on scroll
+                    
+                    if (dy > 0) { // Only trigger when scrolling down
+                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                        val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+                        
+                        Log.d("ContactsFragment", "Scrolled down - lastVisible: $lastVisibleItemPosition, adapter size: ${contactAdapter.itemCount}")
+                        
+                        if (viewModel.shouldLoadMore(lastVisibleItemPosition)) {
+                            Log.d("ContactsFragment", "Triggering loadMoreContacts")
+                            viewModel.loadMoreContacts()
+                        }
+                    }
                 }
             })
         }
@@ -86,7 +99,7 @@ class ContactsFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.contacts.collect { contacts ->
                     contactAdapter.submitList(contacts)
-                    updateUIState(contacts, viewModel.isLoading.value)
+                    updateUIState(contacts, viewModel.isLoading.value, viewModel.isLoadingMore.value)
                 }
             }
         }
@@ -96,20 +109,30 @@ class ContactsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.isLoading.collect { isLoading ->
-                    updateUIState(viewModel.contacts.value, isLoading)
+                    updateUIState(viewModel.contacts.value, isLoading, viewModel.isLoadingMore.value)
                 }
             }
         }
     }
 
-    private fun updateUIState(contacts: List<Contact>, isLoading: Boolean) {
+    private fun observeLoadingMoreState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isLoadingMore.collect { isLoadingMore ->
+                    updateUIState(viewModel.contacts.value, viewModel.isLoading.value, isLoadingMore)
+                }
+            }
+        }
+    }
+
+    private fun updateUIState(contacts: List<Contact>, isLoading: Boolean, isLoadingMore: Boolean) {
         when {
-            isLoading -> {
+            isLoading && contacts.isEmpty() -> {
                 binding.loadingStateLayout.visibility = View.VISIBLE
                 binding.contactsRecyclerView.visibility = View.GONE
                 binding.emptyStateLayout.visibility = View.GONE
             }
-            contacts.isEmpty() -> {
+            contacts.isEmpty() && !isLoading -> {
                 binding.loadingStateLayout.visibility = View.GONE
                 binding.contactsRecyclerView.visibility = View.GONE
                 binding.emptyStateLayout.visibility = View.VISIBLE

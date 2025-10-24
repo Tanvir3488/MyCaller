@@ -23,6 +23,18 @@ interface ContactDao {
     @Query("SELECT * FROM contacts")
      fun getContacts(): Flow<List<Contact>>
 
+    @Query("SELECT * FROM contacts ORDER BY name ASC LIMIT :limit OFFSET :offset")
+    suspend fun getContactsPaginated(limit: Int, offset: Int): List<Contact>
+
+    @Query("SELECT * FROM contacts WHERE REPLACE(name, ' ', '') LIKE '%' || REPLACE(:query, ' ', '') || '%' OR phoneNumbers LIKE '%' || :query || '%' ORDER BY name ASC LIMIT :limit OFFSET :offset")
+    suspend fun searchContactsPaginated(query: String, limit: Int, offset: Int): List<Contact>
+
+    @Query("SELECT COUNT(*) FROM contacts")
+    suspend fun getContactsCount(): Int
+
+    @Query("SELECT COUNT(*) FROM contacts WHERE REPLACE(name, ' ', '') LIKE '%' || REPLACE(:query, ' ', '') || '%' OR phoneNumbers LIKE '%' || :query || '%'")
+    suspend fun getSearchContactsCount(query: String): Int
+
     @Query("SELECT * FROM contacts WHERE phoneNumbers LIKE '%' || :number || '%'")
     suspend fun getContactByNumber(number: String): Contact?
 

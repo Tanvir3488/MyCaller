@@ -150,15 +150,16 @@
 
         <!-- Decline Button -->
         <androidx.cardview.widget.CardView
-            android:id="@+id/btnDecline"
+            android:id="@+id/cardbtnDecline"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:layout_marginEnd="40dp"
+            android:layout_marginEnd="0dp"
             app:cardCornerRadius="40dp"
             app:cardElevation="8dp"
             app:cardBackgroundColor="@android:color/transparent">
 
             <ImageButton
+                android:id="@+id/btnDecline"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_call_end"
@@ -168,17 +169,23 @@
 
         </androidx.cardview.widget.CardView>
 
+        <View
+            android:id="@+id/spaceBetweenButtons"
+            android:layout_width="90dp"
+            android:layout_height="0dp"/>
         <!-- Accept Button -->
         <androidx.cardview.widget.CardView
-            android:id="@+id/btnAccept"
+            android:visibility="visible"
+            android:id="@+id/cardbtnAccept"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:layout_marginStart="40dp"
+            android:layout_marginStart="0dp"
             app:cardCornerRadius="40dp"
             app:cardElevation="8dp"
             app:cardBackgroundColor="@android:color/transparent">
 
             <ImageButton
+                android:id="@+id/btnAccept"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_call"

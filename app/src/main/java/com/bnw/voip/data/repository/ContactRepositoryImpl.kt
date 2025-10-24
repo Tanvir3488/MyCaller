@@ -93,4 +93,30 @@ class ContactRepositoryImpl @Inject constructor(
             apply()
         }
     }
+
+    override suspend fun getContactsPaginated(page: Int, pageSize: Int): PaginationResult {
+        val offset = page * pageSize
+        val contacts = contactDao.getContactsPaginated(pageSize, offset)
+        val totalCount = contactDao.getContactsCount()
+        val hasMoreItems = (offset + contacts.size) < totalCount
+        
+        return PaginationResult(
+            contacts = contacts,
+            hasMoreItems = hasMoreItems,
+            totalCount = totalCount
+        )
+    }
+
+    override suspend fun searchContactsPaginated(query: String, page: Int, pageSize: Int): PaginationResult {
+        val offset = page * pageSize
+        val contacts = contactDao.searchContactsPaginated(query, pageSize, offset)
+        val totalCount = contactDao.getSearchContactsCount(query)
+        val hasMoreItems = (offset + contacts.size) < totalCount
+        
+        return PaginationResult(
+            contacts = contacts,
+            hasMoreItems = hasMoreItems,
+            totalCount = totalCount
+        )
+    }
 }

@@ -28,7 +28,7 @@ class CallingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // Enable edge-to-edge and secure window
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setFlags(
@@ -39,10 +39,10 @@ class CallingActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
-        
+
         binding = ActivityIncomingCallBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
+
         setupAnimations()
         Log.e("CallingActivity:", "onCreate ${intent?.action}")
         when (intent?.action) {
@@ -99,7 +99,8 @@ class CallingActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.uiState.collect { uiState ->
                 Log.e("CallingActivityTTT:", "UI State Updated: ${uiState.isAcceptButtonVisible}")
-                binding.btnAccept.visibility = if (uiState.isAcceptButtonVisible) View.VISIBLE else View.GONE
+                binding.cardbtnAccept.visibility = if (uiState.isAcceptButtonVisible) View.VISIBLE else View.GONE
+                binding.spaceBetweenButtons.visibility = if (uiState.isAcceptButtonVisible) View.VISIBLE else View.GONE
               //  binding.btnDecline.text = uiState.declineButtonText
             }
         }
@@ -159,29 +160,29 @@ class CallingActivity : AppCompatActivity() {
         binding.avatarCard.alpha = 0f
         binding.avatarCard.scaleX = 0.5f
         binding.avatarCard.scaleY = 0.5f
-        
+
         binding.avatarCard.animate()
             .alpha(1f)
             .scaleX(1f)
             .scaleY(1f)
             .setDuration(600)
             .start()
-        
+
         // Animate call info card entrance
         binding.callInfoCard.alpha = 0f
         binding.callInfoCard.translationY = 50f
-        
+
         binding.callInfoCard.animate()
             .alpha(1f)
             .translationY(0f)
             .setDuration(400)
             .setStartDelay(200)
             .start()
-        
+
         // Animate action buttons entrance
         binding.actionButtonsLayout.alpha = 0f
         binding.actionButtonsLayout.translationY = 100f
-        
+
         binding.actionButtonsLayout.animate()
             .alpha(1f)
             .translationY(0f)
@@ -189,7 +190,7 @@ class CallingActivity : AppCompatActivity() {
             .setStartDelay(400)
             .start()
     }
-    
+
     private fun animateButtonPress(view: View) {
         val scaleAnimation = AnimatorSet().apply {
             playTogether(
@@ -200,7 +201,7 @@ class CallingActivity : AppCompatActivity() {
         }
         scaleAnimation.start()
     }
-    
+
     override fun onDestroy() {
         super.onDestroy()
     }
