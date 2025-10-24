@@ -61,6 +61,7 @@ class CallTracker @Inject constructor(
                         )
                     }
                     is CallState.Incoming -> {
+                        callNotificationManager.showIncomingCall(callState.call.remoteAddress?.displayName ?: UNKNOWN_CALLER)
                         currentCallLog = CallLogs(
                             callerName = callState.call.remoteAddress?.displayName ?: UNKNOWN_CALLER,
                             phoneNumber = callState.call.remoteAddress?.username ?: "",

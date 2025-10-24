@@ -79,12 +79,12 @@ class CustomeSipManager @Inject constructor(
                 state: Call.State,
                 message: String
             ) {
-                Log.d(AppConstants.TAG_SIP_MANAGER, "Call state changed: $state, message: $message")
+                Log.e(AppConstants.TAG_SIP_MANAGER, "Call state changed: $state, message: $message")
                 val callState = when (state) {
                     Call.State.IncomingReceived -> CallState.Incoming(call)
                     Call.State.OutgoingInit, Call.State.OutgoingProgress, Call.State.OutgoingRinging -> CallState.Outgoing(call)
                     Call.State.Connected, Call.State.StreamsRunning -> CallState.Connected(call)
-                    Call.State.Released -> CallState.Released(call)
+                    Call.State.End -> CallState.Released(call)
                     Call.State.Error -> CallState.Error(call, message)
                     else -> _callState.value.callState
                 }

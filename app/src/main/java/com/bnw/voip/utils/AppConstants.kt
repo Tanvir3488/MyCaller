@@ -32,5 +32,5 @@ object AppConstants {
     const val UNKNOWN_CALLER = "Unknown"
 
     // Logging Tags
-    const val TAG_SIP_MANAGER = "SipManager"
+    const val TAG_SIP_MANAGER = "TERSipManager"
 }

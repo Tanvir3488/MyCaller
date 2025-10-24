@@ -9,6 +9,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -27,6 +30,16 @@ import javax.inject.Singleton
 @Singleton
 class CallNotificationManager @Inject constructor(@ApplicationContext private val context: Context) {
 
+    private val vibrator: Vibrator by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+    }
+
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -38,6 +51,7 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                 // Enable sound and vibration for better alerting
                 enableVibration(true)
+                vibrationPattern = longArrayOf(0, 500, 200, 500, 200)
                 setBypassDnd(true) // Bypass Do Not Disturb
             }
             val manager = context.getSystemService(NotificationManager::class.java)
@@ -56,6 +70,10 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
 
     fun showIncomingCall(phoneNumber: String) {
         Log.e("CallNotificationManager", "Showing incoming call notification for $phoneNumber")
+        
+        // Start continuous vibration for incoming call
+        startIncomingCallVibration()
+        
         // Check notification permission first (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(
@@ -235,5 +253,26 @@ class CallNotificationManager @Inject constructor(@ApplicationContext private va
     fun dismissNotification() {
         val manager = NotificationManagerCompat.from(context)
         manager.cancel(AppConstants.CALL_NOTIFICATION_ID)
+        stopVibration()
+    }
+    
+    private fun startIncomingCallVibration() {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.VIBRATE) == PackageManager.PERMISSION_GRANTED && 
+            vibrator.hasVibrator()) {
+            val pattern = longArrayOf(0, 800, 400, 800, 400)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val vibrationEffect = VibrationEffect.createWaveform(pattern, 0)
+                vibrator.vibrate(vibrationEffect)
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(pattern, 0)
+            }
+        }
+    }
+    
+    private fun stopVibration() {
+        if (vibrator.hasVibrator()) {
+            vibrator.cancel()
+        }
     }
 }
