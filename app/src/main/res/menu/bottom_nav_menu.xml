@@ -2,18 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/dialerFragment"
-        android:icon="@drawable/dial_pad"
-        android:title="Dialer" />
+        android:icon="@drawable/ic_btm_dialpad"
+        android:title="Call" />
     <item
         android:id="@+id/callHistoryFragment"
-        android:icon="@drawable/call_history"
-        android:title="History" />
+        android:icon="@drawable/ic_call_history"
+        android:title="Recents" />
     <item
         android:id="@+id/contactsFragment"
-        android:icon="@drawable/contuct"
-        android:title="Contacts" />
-    <item
-        android:id="@+id/profileFragment"
-        android:icon="@drawable/ic_profile"
-        android:title="Profile" />
+        android:icon="@drawable/ic_contacts"
+        android:title="People" />
 </menu>

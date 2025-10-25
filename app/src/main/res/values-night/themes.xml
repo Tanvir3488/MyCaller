@@ -1,20 +1,29 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.Voip" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
-        <item name="android:statusBarColor">@color/primary_blue</item>
+    <style name="Base.Theme.Voip" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- Dark theme customization -->
+        <item name="colorPrimary">@color/primary_purple</item>
+        <item name="colorPrimaryDark">@color/primary_purple_dark</item>
+        <item name="colorAccent">@color/accent_cyan</item>
+        <item name="android:colorBackground">@color/background_dark</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+        <item name="android:statusBarColor">@color/background_dark</item>
+        <item name="android:navigationBarColor">@color/background_dark</item>
         <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
     </style>
     <style name="DialButton">
         <item name="android:layout_width">100dp</item>
         <item name="android:layout_height">100dp</item>
         <item name="android:layout_margin">8dp</item>
         <item name="android:background">@drawable/bg_circle_grey</item>
-        <item name="android:backgroundTint">@null</item> <!-- this removes the purple -->
+        <item name="android:backgroundTint">@color/dialer_key_background</item>
         <item name="android:textSize">18sp</item>
         <item name="android:gravity">center</item>
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColor">@color/dialer_key_text_primary</item>
     </style>
     <style name="DialKey">
         <item name="android:layout_width">90dp</item>
@@ -23,7 +32,7 @@
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/bg_circle_grey</item>
         <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColor">@color/dialer_key_text_primary</item>
     </style>
 
 </resources>

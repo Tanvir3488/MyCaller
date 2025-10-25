@@ -102,7 +102,7 @@ class CallHistoryAdapter(
                     binding.callTypeIconContainer.setCardBackgroundColor(
                         ContextCompat.getColor(context, R.color.call_answered)
                     )
-                    binding.callTypeIcon.setImageResource(R.drawable.ic_call_incoming)
+                    binding.callTypeIcon.setImageResource(R.drawable.ic_incoming)
                     binding.callType.text = "ANSWERED"
                     binding.callTypeBadge.setCardBackgroundColor(
                         ContextCompat.getColor(context, R.color.call_answered)
@@ -112,7 +112,7 @@ class CallHistoryAdapter(
                     binding.callTypeIconContainer.setCardBackgroundColor(
                         ContextCompat.getColor(context, R.color.call_missed)
                     )
-                    binding.callTypeIcon.setImageResource(R.drawable.miss_call)
+                    binding.callTypeIcon.setImageResource(R.drawable.ic_misscall)
                     binding.callType.text = "MISSED"
                     binding.callTypeBadge.setCardBackgroundColor(
                         ContextCompat.getColor(context, R.color.call_missed)

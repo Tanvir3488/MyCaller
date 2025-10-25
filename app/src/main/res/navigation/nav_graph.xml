@@ -20,9 +20,4 @@
         android:name="com.bnw.voip.ui.main.callhistory.CallHistoryFragment"
         android:label="fragment_call_history"
         tools:layout="@layout/fragment_call_history" />
-    <fragment
-        android:id="@+id/profileFragment"
-        android:name="com.bnw.voip.ui.main.profile.ProfileFragment"
-        android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile" />
 </navigation>

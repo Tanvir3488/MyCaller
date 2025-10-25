@@ -97,7 +97,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         app:cardBackgroundColor="@color/call_incoming"
-                        app:cardCornerRadius="8dp"
+                        app:cardCornerRadius="3dp"
                         app:cardElevation="0dp">
 
                         <TextView

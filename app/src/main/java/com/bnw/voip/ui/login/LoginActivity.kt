@@ -2,6 +2,7 @@ package com.bnw.voip.ui.login
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -9,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
+import com.bnw.voip.R
 import com.bnw.voip.databinding.ActivityLoginBinding
 import com.bnw.voip.ui.main.MainActivity
 import com.bnw.voip.voip.CallState
@@ -22,6 +24,7 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private val viewModel: LoginViewModel by viewModels()
+    private var isPasswordVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,10 +49,31 @@ class LoginActivity : AppCompatActivity() {
             performLogin()
         }
         
+        // Set up password toggle functionality
+        binding.passwordToggle.setOnClickListener {
+            togglePasswordVisibility()
+        }
+        
         // Set up sign up text view click listener (placeholder for now)
         binding.signupTextView.setOnClickListener {
             Toast.makeText(this, "Sign up functionality not implemented yet", Toast.LENGTH_SHORT).show()
         }
+    }
+    
+    private fun togglePasswordVisibility() {
+        if (isPasswordVisible) {
+            // Hide password
+            binding.passwordEditText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            binding.passwordToggle.setImageResource(R.drawable.ic_visibility_off)
+            isPasswordVisible = false
+        } else {
+            // Show password
+            binding.passwordEditText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            binding.passwordToggle.setImageResource(R.drawable.ic_visibility)
+            isPasswordVisible = true
+        }
+        // Move cursor to end
+        binding.passwordEditText.setSelection(binding.passwordEditText.text.length)
     }
     
     private fun performLogin() {
@@ -58,18 +82,16 @@ class LoginActivity : AppCompatActivity() {
         
         // Basic validation
         if (username.isEmpty()) {
-            binding.usernameInputLayout.error = "Username is required"
+            Toast.makeText(this, "Username is required", Toast.LENGTH_SHORT).show()
+            binding.usernameEditText.requestFocus()
             return
         }
         
         if (password.isEmpty()) {
-            binding.passwordInputLayout.error = "Password is required"
+            Toast.makeText(this, "Password is required", Toast.LENGTH_SHORT).show()
+            binding.passwordEditText.requestFocus()
             return
         }
-        
-        // Clear any previous errors
-        binding.usernameInputLayout.error = null
-        binding.passwordInputLayout.error = null
         
         // Start login process
         viewModel.login(username, password)

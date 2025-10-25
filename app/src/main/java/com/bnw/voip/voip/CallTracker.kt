@@ -72,6 +72,7 @@ class CallTracker @Inject constructor(
                         )
                     }
                     is CallState.Connected -> {
+                        Log.e("isCallConnected","OnConnected")
                         isCallConnected = true
                         if (_callConnectedTime.value == null) {
                             _callConnectedTime.value = SystemClock.elapsedRealtime()
@@ -101,6 +102,7 @@ class CallTracker @Inject constructor(
 
                             addCallLogUseCase(it.copy(callEndTime = endTime, callDuration = duration, callType = callType))
                             currentCallLog = null
+                            isCallConnected = false
                         }
                     }
                     else -> {
